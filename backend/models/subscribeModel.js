@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const subscribeSchema = new mongoose.Schema({
-    deviceFingerprint:{
+    token:{
       type: String,
       required: true,
       unique: true,

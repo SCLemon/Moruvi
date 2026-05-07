@@ -23,7 +23,7 @@
                         <div class="subText subTextForMobile" ref="subTextForMobile">{{ subTextForMobile }}</div>
                     </div>
                     <div class="box">
-                        <div class="btn btn-1" @click="goTo('/academic')">進入基地 <i class="fa-solid fa-arrow-right start-arrow"></i></div>
+                        <div class="btn btn-1" @click="goTo('/moruvi/overview')">進入基地 <i class="fa-solid fa-arrow-right start-arrow"></i></div>
                         <div class="btn btn-2" @click="scrollToSection('developer')">版主介紹 <i class="fa-solid fa-chevron-right"></i></div>
                     </div>
                 </div>

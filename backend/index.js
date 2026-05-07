@@ -13,8 +13,7 @@ const rateLimit = require('express-rate-limit');
 
 // 不受限速
 const whitelistRoutes = [
-    '/api/learn/getCourseBanner',
-    '/api/post/image',
+    '/api/image',
 ];
 
 const limiter = rateLimit({
@@ -22,7 +21,7 @@ const limiter = rateLimit({
     max: 200,
     message: 'Too many requests from this account, please try again after a minute.',
     keyGenerator: (req, res) => {
-        return req.headers['x-user-token'] || req.headers['x-user-fingerprint'];
+        return req.headers['x-user-token'];
     },
     skip: (req, res) => {
         return whitelistRoutes.some(route => req.path.startsWith(route));
@@ -48,38 +47,15 @@ process.on('SIGINT', function() {
     process.exit(0);
 });
 
-const adminRouter = require('./routes/adminRouter');
-app.use(adminRouter);
-
 const loginRouter = require('./routes/loginRouter');
 app.use(loginRouter);
 
-const create_columnRouter = require('./routes/create_columnRouter');
-app.use(create_columnRouter);
-
-const create_userRouter = require('./routes/create_userRouter');
-app.use(create_userRouter);
-
-const postRouter = require('./routes/postRouter');
-app.use(postRouter);
-
-const columnRouter = require('./routes/columnRouter');
-app.use(columnRouter);
-
-const userInfoRouter = require('./routes/userInfoRouter');
-app.use(userInfoRouter);
-
-const studyRecordRouter = require('./routes/studyRecordRouter');
-app.use(studyRecordRouter);
-
-const paperRecordRouter = require('./routes/paperRecordRouter');
-app.use(paperRecordRouter);
 
 const {router: serviceWorkerRouter} = require('./routes/service-worker/serviceWorkerRouter')
 app.use(serviceWorkerRouter)
 
-app.listen(3007,()=>{
-    console.log('server is running on port 3007')
+app.listen(3008,()=>{
+    console.log('server is running on port 3008')
 })
 
 // 避免系統中斷

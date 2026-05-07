@@ -4,12 +4,8 @@ const router = express.Router();
 
 const userModel = require('../models/userModel');
 
-const {format} = require('date-fns')
-
-const levelTitle = [
-    '新手會員','普通會員','進階會員','高級會員','鉑金會員',
-    '鑽石會員','星耀會員','頂級會員','特權貴賓','頂級版主'
-]
+const {format} = require('date-fns');
+const { uuid } = require('uuidv4');
 
 function historyGenerator(req){
     return {
@@ -24,66 +20,42 @@ function historyGenerator(req){
     };
 }
 
-// anonymous mode
-router.post('/login/anonymous', async (req, res) => {
-    const account = 'Visitor';
-    const type = 'student'
+// 註冊驗證
+router.post('/login/register', async (req, res) => {
+    const { account, password } = req.body;
+
+    if (!account || !password) {
+        return res.send({
+            type:'error',
+            message:'註冊資料不可為空。'
+        });
+    }
 
     try {
-        const user = await userModel.findOne({ account, type });
-        if (!user) {
+        const existingUser = await userModel.findOne({ account });
+        if (existingUser) {
             return res.send({
                 type:'error',
-                message:'本網站暫時不開放訪客模式登入。'
-            });
-        }
-        if (!user.status){
-            return res.send({
-                type:'error',
-                message:'本網站暫時不開放訪客模式登入。'
+                message:'帳號已存在，請選擇其他帳號。'
             });
         }
 
-        const fingerprint = req.headers['x-user-fingerprint'];
-        if (!fingerprint || !/^[a-f0-9]{64}$/.test(fingerprint)) {
-            return res.send({ type: 'error',message: '驗證失敗（參數異常錯誤）'});
-        }
+        const existingCount = await userModel.countDocuments({});
+        const newUser = new userModel({
+            createTime: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
+            token: uuid(),
+            code: existingCount + 100001,
+            account,
+            password,
+            name: `Moruvi #${existingCount + 1}`,
+        });
 
-        const loginTime = format(new Date(), 'yyyy-MM-dd HH:mm:ss')
-        user.lastOnline = loginTime;
-        user.fingerprint = fingerprint;
+        await newUser.save();
 
-        // 使用者歷史資訊
-        const history = historyGenerator(req);
-
-        user.historyRecord = [
-            ...(user.historyRecord || []),
-            history
-        ].slice(-100);
-
-        await user.save();
-
-        res.cookie('authToken',user.token,{
-            maxAge:86400 * 1000 * 3, // 3 天
-        })
-        userData = {
-            idx:user.idx,
-            account:user.account,
-            typeEng:user.type,
-            userImgUrl:user.userImgUrl.url,
-            level: {
-                level: user.level,
-                levelTitle: levelTitle[user.level - 1]
-            },
-            type: user.type == 'teacher'?'教師':'學生',
-            name: user.name
-        }
         return res.send({
             type:'success',
-            userInfo: userData,
-            message:'訪客模式登入成功！'
+            message:'註冊成功！請使用新帳號登入。' 
         });
-        
     } catch (e) {
         console.log(e)
         return res.send({
@@ -92,6 +64,7 @@ router.post('/login/anonymous', async (req, res) => {
         });
     }
 });
+
 // 登入驗證
 router.post('/login/verify', async (req, res) => {
     const {account, password} = req.body;
@@ -111,21 +84,9 @@ router.post('/login/verify', async (req, res) => {
                 message:'帳號或密碼錯誤。'
             });
         }
-        if (!user.status){
-            return res.send({
-                type:'error',
-                message:'帳號已被凍結，請洽詢客服人員協助。'
-            });
-        }
-
-        const fingerprint = req.headers['x-user-fingerprint'];
-        if (!fingerprint || !/^[a-f0-9]{64}$/.test(fingerprint)) {
-            return res.send({ type: 'error',message: '驗證失敗（參數異常錯誤）'});
-        }
 
         const loginTime = format(new Date(), 'yyyy-MM-dd HH:mm:ss')
         user.lastOnline = loginTime;
-        user.fingerprint = fingerprint;
 
         // 使用者歷史資訊
         const history = historyGenerator(req);
@@ -140,21 +101,9 @@ router.post('/login/verify', async (req, res) => {
         res.cookie('authToken',user.token,{
             maxAge:86400 * 1000 * 7, // 7 天
         })
-        userData = {
-            idx:user.idx,
-            account:user.account,
-            typeEng:user.type,
-            userImgUrl:user.userImgUrl.url,
-            level: {
-                level: user.level,
-                levelTitle: levelTitle[user.level - 1]
-            },
-            type: user.type == 'teacher'?'教師':'學生',
-            name: user.name
-        }
+
         return res.send({
             type:'success',
-            userInfo: userData,
             message:'登入成功！'
         });
         
@@ -176,31 +125,9 @@ router.post('/login/token', async (req, res) => {
         if (!user) {
             return res.send({type:'error', message:'無效使用者，請重新登入', showAlert:true});
         }
-        else if(!user.status){
-            return res.send({type:'error', message:'此帳號已被凍結，請洽客服人員', showAlert:true});
-        }
-        userData = {
-            idx:user.idx,
-            account:user.account,
-            typeEng:user.type,
-            name: user.name,
-            level: {
-                level: user.level,
-                levelTitle: levelTitle[user.level - 1]
-            },
-            userImgUrl:user.userImgUrl.url,
-            type: user.type == 'teacher'?'教師':'學生'
-        }
-
-        const fingerprint = req.headers['x-user-fingerprint'];
-        if (!fingerprint || !/^[a-f0-9]{64}$/.test(fingerprint)) {
-            return res.send({ type: 'error',message: '驗證失敗（參數異常錯誤）'});
-        }
-
-        
+  
         const loginTime = format(new Date(), 'yyyy-MM-dd HH:mm:ss')
         user.lastOnline = loginTime;
-        user.fingerprint = fingerprint;
 
         // 使用者歷史資訊
         const history = historyGenerator(req);
@@ -214,7 +141,6 @@ router.post('/login/token', async (req, res) => {
 
         return res.send({
             type:'success',
-            userInfo: userData,
             message:'登入成功！',
             showAlert: false
         });

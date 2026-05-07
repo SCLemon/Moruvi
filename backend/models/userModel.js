@@ -2,42 +2,23 @@ const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
     createTime:String,
-    // 可傳到前端系統判定
-    idx:{
+    room:{
         type: String,
-        required:true,
-        unique: true,
         trim: true,
+        default: '',
     },
-    // 姓名
-    name:{
-        type: String,
-        required:true,
-        trim: true,
-    },
-    // 頭像 -- 顯現在前端用
-    userImgUrl: {
-        url: { 
-            type: String, 
-            trim: true, 
-            default: 'img/user.png' 
-        },
-        original: { 
-            type: String, 
-            trim: true, 
-            default: '' 
-        }
-    },
-    // 不可傳到前端系統判定
+    // 私人特徵碼（uuid）
     token: {
         type: String,
         required:true,
         unique: true,
         trim: true,
     },
-    group:{
+    // 公開特徵碼 (邀請碼 100001)
+    code:{
         type: String,
         required:true,
+        unique: true,
         trim: true,
     },
     account:{
@@ -51,23 +32,24 @@ const userSchema = new mongoose.Schema({
         required:true,
         trim: true,
     },
-    type:{
-        type:String,
-        required:true,
+    name:{
+        type: String,
+        trim: true,
+        default: 'Moruvi',
     },
-    level:{
-        type: Number,
-        default: 1,
-    },
-    status: {
-        type: Boolean,
-        default: true,
+    userImgUrl: {
+        url: { 
+            type: String, 
+            trim: true, 
+            default: 'img/user.png' 
+        },
+        original: { 
+            type: String, 
+            trim: true, 
+            default: '' 
+        }
     },
     lastOnline:{
-        type:String,
-        default:''
-    },
-    fingerprint:{
         type:String,
         default:''
     },
@@ -76,18 +58,6 @@ const userSchema = new mongoose.Schema({
         default: []
     },
     detail:{
-        photoStickers:{  // 4.5x3.5
-            url: { 
-                type: String, 
-                trim: true, 
-                default: 'img/photoStickers.png' 
-            },
-            original: { 
-                type: String, 
-                trim: true, 
-                default: '' 
-            }
-        },
         phoneNumber:{
             type:String,
             default:''
@@ -103,8 +73,6 @@ const userSchema = new mongoose.Schema({
     }
 });
 
-// 給 auth.middleware 使用
-userSchema.index({ token: 1, status: 1 });
 
 const userModel = mongoose.model('User', userSchema);
 

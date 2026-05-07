@@ -8,7 +8,7 @@ const authMiddleware = async (req, res, next) => {
             message: '未找到授權，請重新登入。',
         });
     }
-    const user = await userModel.findOne({ token, status:true });
+    const user = await userModel.findOne({ token });
     if (!user) {
         return res.send({
             type: 'error',
