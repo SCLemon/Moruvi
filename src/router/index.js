@@ -7,7 +7,7 @@ import Index from '../pages/Index/Index.vue'
 import Login from '../pages/Login/Login.vue'
 
 import Moruvi from '@/pages/Moruvi/Moruvi.vue'
-import Overview from '../pages/Moruvi/pages/Overview/Overview.vue'
+import Home from '../pages/Moruvi/pages/Home/Home.vue'
 
 
 Vue.use(VueRouter)
@@ -26,12 +26,12 @@ const router = new VueRouter({
             component:Moruvi,
             children:[
                 {
-                    path:'overview',
-                    component: Overview,
+                    path:'home',
+                    component: Home,
                 },
                 {
                     path:'/',
-                    redirect:'overview'
+                    redirect:'home'
                 },
             ]
         },

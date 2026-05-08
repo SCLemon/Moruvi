@@ -5,8 +5,8 @@
           <img src="logo/full_logo_white.png" alt="">
         </div>
         <div class="normalForm">
-          <div class="login"><div class="login_text">帳號：</div><input class="input" placeholder="請輸入帳號" v-model="loginData.account" clearable></input></div>
-          <div class="login"><div class="login_text">密碼：</div><input class="input" placeholder="請輸入密碼" v-model="loginData.password" clearable show-password></input></div>
+          <div class="login"><div class="login_text">帳號：</div><input class="input" placeholder="請輸入帳號" v-model="loginData.account"></input></div>
+          <div class="login"><div class="login_text">密碼：</div><input class="input" type="password" placeholder="請輸入密碼" v-model="loginData.password"></input></div>
           <div class="btn_wrapper">
             <button class="btn" @click="challenge('register')">會員註冊</button>
             <button class="btn" @click="challenge('login')">會員登入</button>
@@ -50,7 +50,7 @@ export default {
         data = res.data;
 
         if(data.type == 'success'){
-          this.$router.replace('/moruvi/overview').catch((e)=>{})
+          this.$router.replace('/moruvi').catch((e)=>{})
         }
       }
       catch(e){}

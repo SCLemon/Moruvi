@@ -9,17 +9,19 @@ Vue.config.productionTip = false
 // Vue.use(ElementUI);
 
 import {
-  Carousel, CarouselItem, 
-  Notification, MessageBox
+  Icon, Carousel, CarouselItem, Notification, MessageBox
 } from 'element-ui'
+
 
 Vue.prototype.$notify = Notification
 Vue.prototype.$alert = MessageBox.alert
 Vue.prototype.$confirm = MessageBox.confirm
 Vue.prototype.$prompt = MessageBox.prompt
 
+Vue.use(Icon)
 Vue.use(Carousel)
 Vue.use(CarouselItem)
+
 
 // v-lazy
 Vue.directive('lazy', {

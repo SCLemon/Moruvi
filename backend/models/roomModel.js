@@ -6,6 +6,11 @@ const roomSchema = new mongoose.Schema({
         trim: true,
         default: '',
     },
+    roomName:{
+        type: String,
+        trim: true,
+        default: '甜蜜小屋',
+    },
     owners:{ // 最多兩人
         type: Array,
         default: [],
