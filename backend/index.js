@@ -50,6 +50,8 @@ process.on('SIGINT', function() {
 const loginRouter = require('./routes/loginRouter');
 app.use(loginRouter);
 
+const mileStoneRouter = require('./routes/mileStoneRouter');
+app.use(mileStoneRouter);
 
 const {router: serviceWorkerRouter} = require('./routes/service-worker/serviceWorkerRouter')
 app.use(serviceWorkerRouter)

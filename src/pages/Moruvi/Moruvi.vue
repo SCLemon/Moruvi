@@ -36,14 +36,14 @@ export default {
 <style scoped>
     .view{
         width: 100%;
-        height: calc(100vh - 60px);
+        height: calc(100vh - 80px);
         display: flex;
         flex-direction: column;
         box-sizing: border-box;
     }
     .footer{
         width: 100%;
-        height: 60px;
+        height: 80px;
         position: fixed;
         bottom: 0;
         box-sizing: border-box;
@@ -53,7 +53,7 @@ export default {
     }
     .route{
         box-sizing: border-box;
-        height: 60px;
+        height: 80px;
         width: calc(100vw / 5);
         display: flex;
         flex-direction: column;

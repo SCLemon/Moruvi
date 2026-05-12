@@ -9,7 +9,7 @@ Vue.config.productionTip = false
 // Vue.use(ElementUI);
 
 import {
-  Icon, Carousel, CarouselItem, Notification, MessageBox
+  Icon, Carousel, CarouselItem, Notification, MessageBox, DatePicker, Input
 } from 'element-ui'
 
 
@@ -21,7 +21,8 @@ Vue.prototype.$prompt = MessageBox.prompt
 Vue.use(Icon)
 Vue.use(Carousel)
 Vue.use(CarouselItem)
-
+Vue.use(DatePicker)
+Vue.use(Input)
 
 // v-lazy
 Vue.directive('lazy', {

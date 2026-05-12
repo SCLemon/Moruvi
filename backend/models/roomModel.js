@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
 
 const roomSchema = new mongoose.Schema({
-    room:{
+    roomId:{
         type: String,
         trim: true,
-        default: '',
+        unique: true,
+        required: true
     },
     roomName:{
         type: String,
@@ -22,7 +23,10 @@ const roomSchema = new mongoose.Schema({
             default: '',
         },
         limit:{
-            memory: 1*1024*1024 // 預設 1GB
+            memory:{
+                type: Number,
+                default: 1*1024*1024 // 預設 1GB
+            }
         }
 
     }

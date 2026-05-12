@@ -2,20 +2,13 @@ const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
     createTime:String,
-    room:{
+    roomId:{
         type: String,
         trim: true,
         default: '',
     },
     // 私人特徵碼（uuid）
     token: {
-        type: String,
-        required:true,
-        unique: true,
-        trim: true,
-    },
-    // 公開特徵碼 (邀請碼 100001)
-    code:{
         type: String,
         required:true,
         unique: true,

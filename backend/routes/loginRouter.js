@@ -3,9 +3,19 @@ const express = require('express');
 const router = express.Router();
 
 const userModel = require('../models/userModel');
+const roomModel = require('../models/roomModel');
 
 const {format} = require('date-fns');
 const { uuid } = require('uuidv4');
+const fs = require('fs');
+
+// 跨平台基準路徑
+const baseDirMap = {
+  win32: 'D:/moruvi_database/local/',
+  darwin: '/Volumes/moruvi_database/local/'
+};
+const baseDir = baseDirMap[process.platform] || '/mnt/moruvi_database/local/';
+
 
 function historyGenerator(req){
     return {
@@ -22,7 +32,9 @@ function historyGenerator(req){
 
 // 註冊驗證
 router.post('/login/register', async (req, res) => {
-    const { account, password } = req.body;
+
+    const token =  uuid();
+    let { account, password, roomId } = req.body;
 
     if (!account || !password) {
         return res.send({
@@ -32,6 +44,7 @@ router.post('/login/register', async (req, res) => {
     }
 
     try {
+
         const existingUser = await userModel.findOne({ account });
         if (existingUser) {
             return res.send({
@@ -40,11 +53,36 @@ router.post('/login/register', async (req, res) => {
             });
         }
 
+        const room = await roomModel.findOne({ roomId });
+        if(!roomId || !room){
+            roomId = uuid();
+            const dataBaseUrl = `${baseDir}${roomId}/`;
+
+            fs.mkdirSync(dataBaseUrl, { recursive: true });
+
+            const newRoom = new roomModel({
+                roomId,
+                owners: [token],
+                'database.url': dataBaseUrl,
+            });
+            await newRoom.save(); 
+        }
+        else if(room.owners.length >= 2){
+            return res.send({
+                type:'error',
+                message:'房間已滿員，請選擇其他房間或建立新房間。'
+            });
+        }
+        else{
+            room.owners.push(token);
+            await room.save();
+        }
+
         const existingCount = await userModel.countDocuments({});
         const newUser = new userModel({
             createTime: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
-            token: uuid(),
-            code: existingCount + 100001,
+            roomId,
+            token,
             account,
             password,
             name: `Moruvi #${existingCount + 1}`,
@@ -52,9 +90,13 @@ router.post('/login/register', async (req, res) => {
 
         await newUser.save();
 
+        res.cookie('authToken',token,{
+            maxAge:86400 * 1000 * 7, // 7 天
+        })
+
         return res.send({
             type:'success',
-            message:'註冊成功！請使用新帳號登入。' 
+            message:'註冊成功。' 
         });
     } catch (e) {
         console.log(e)

@@ -54,12 +54,7 @@ export default {
     overflow: hidden;
   }
   .PWACSS_MessageBox{
-    
-  }
-  @media screen and (max-width: 440px) {
-    .PWACSS_MessageBox{
-      width: 85vw !important;
-    }
+    width: 85vw !important;
   }
   @font-face {
     font-family: "element-icons";

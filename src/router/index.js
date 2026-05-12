@@ -8,7 +8,7 @@ import Login from '../pages/Login/Login.vue'
 
 import Moruvi from '@/pages/Moruvi/Moruvi.vue'
 import Home from '../pages/Moruvi/pages/Home/Home.vue'
-
+import HomeModifier from '../pages/Moruvi/pages/HomeModifier/HomeModifier.vue'
 
 Vue.use(VueRouter)
 const router = new VueRouter({
@@ -28,6 +28,10 @@ const router = new VueRouter({
                 {
                     path:'home',
                     component: Home,
+                },
+                {
+                    path:'home-modifier',
+                    component: HomeModifier,
                 },
                 {
                     path:'/',
@@ -52,7 +56,7 @@ router.beforeEach(async (to, from, next) => {
         return next()
     }
     if (!token) {
-        return next('/login')
+        console.log('hwew')
     }
     
     const res = await axios.post('/login/token',{save:false},{

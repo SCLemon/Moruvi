@@ -26,6 +26,7 @@ export default {
       loginData:{
         account:'',
         password:'',
+        roomId:'',
       },
     }
   },
@@ -36,21 +37,38 @@ export default {
     async challenge(type){
 
       let url;
-      if(type == 'register') url = '/login/register'
+      if(type == 'register'){
+
+        url = '/login/register'
+
+        try {
+          
+            const { value } = await this.$prompt(
+              '創建或加入房間','系統訊息',
+              {
+                inputPlaceholder:'請輸入房間 ID（創建新房間請留空）',
+                confirmButtonText: '確認',
+                cancelButtonText: '取消',
+                customClass: 'PWACSS_MessageBox'
+              }
+            );
+            this.loginData.roomId = value;
+
+        } catch (e) {
+            return;
+        }
+      }
       else if(type == 'login') url = '/login/verify'
       else  window.location.reload();
 
       let data;
-      if(Object.values(this.loginData).some(value => value === null || value === undefined || value.trim() === '')){
-          return this.$bus.$emit('handleAlert','系統訊息','輸入資料不可為空。','error')
-      }
       try{
         const res = await axios.post(url,this.loginData)
 
         data = res.data;
 
         if(data.type == 'success'){
-          this.$router.replace('/moruvi').catch((e)=>{})
+          this.$router.replace('/moruvi').catch((e)=>{});
         }
       }
       catch(e){}
