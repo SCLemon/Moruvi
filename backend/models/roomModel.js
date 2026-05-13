@@ -7,6 +7,10 @@ const roomSchema = new mongoose.Schema({
         unique: true,
         required: true
     },
+    locked:{
+        type: Boolean,
+        default: true,
+    },
     roomName:{
         type: String,
         trim: true,

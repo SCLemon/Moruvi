@@ -2,7 +2,7 @@
     <div>
         <div class="header">
             <div class="header-list-back" @click="goTo('/moruvi/home')"><i class="el-icon-arrow-left"></i></div>
-            <div class="header-title">里程碑記錄</div>
+            <div class="header-title">日誌記錄</div>
         </div>
         <div class="form">
             <div class="form-date"><span class="form-flag">日期：</span><el-date-picker v-model="form.date" type="date" placeholder="選擇日期"></el-date-picker></div>

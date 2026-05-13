@@ -73,6 +73,12 @@ router.post('/login/register', async (req, res) => {
                 message:'房間已滿員，請選擇其他房間或建立新房間。'
             });
         }
+        else if(room.locked){
+            return res.send({
+                type:'error',
+                message:'房間已鎖定，請向房主申請解鎖。'
+            });
+        }
         else{
             room.owners.push(token);
             await room.save();

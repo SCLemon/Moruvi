@@ -33,6 +33,11 @@ export default {
     }
   },
   mounted(){
+    const roomId = this.$route.query.roomId;
+    if(roomId){
+      this.mode = 'register';
+      this.loginData.roomId = roomId;
+    }
   },
   methods:{
     changeMode(){

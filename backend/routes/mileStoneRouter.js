@@ -4,6 +4,7 @@ const router = express.Router();
 
 const userModel = require('../models/userModel');
 const mileStoneModel = require('../models/mileStoneModel');
+const roomModel = require('../models/roomModel');
 
 const { format } = require('date-fns');
 const { uuid } = require('uuidv4');
@@ -32,7 +33,7 @@ router.get('/api/milestone/getData', authMiddleware, async (req, res) => {
         return res.send({
             type:'success',
             roomId: user.roomId,
-            message:'里程碑資料獲取成功。',
+            message:'戀愛日誌獲取成功。',
             data: mileStoneData.list.sort((a, b) => new Date(a.date) - new Date(b.date)) || [],
         });
 
@@ -75,7 +76,7 @@ router.post('/api/milestone/add', authMiddleware, async (req, res) => {
 
         return res.send({
             type:'success',
-            message:'里程碑資料新增成功。',
+            message:'戀愛日誌新增成功。',
         });
 
     } catch (e ) {
@@ -110,7 +111,7 @@ router.delete('/api/milestone/remove/:itemId', authMiddleware, async (req, res) 
 
         return res.send({
             type:'success',
-            message:'里程碑資料刪除成功。',
+            message:'戀愛日誌刪除成功。',
         });
 
     } catch (e ) {
@@ -146,7 +147,7 @@ router.put('/api/milestone/edit', authMiddleware, async (req, res) => {
         if(itemIndex === -1){
             return res.send({
                 type:'error',
-                message:'找不到對應的里程碑資料。'
+                message:'找不到對應的戀愛日誌。'
             });
         }
 
@@ -160,10 +161,93 @@ router.put('/api/milestone/edit', authMiddleware, async (req, res) => {
 
         return res.send({
             type:'success',
-            message:'里程碑資料修改成功。',
+            message:'戀愛日誌修改成功。',
         });
 
     } catch (e ) {
+        console.log(e)
+        return res.send({
+            type:'error',
+            message:'伺服器錯誤，請洽客服人員協助。'
+        });
+    }
+});
+
+// 獲取 roomInfo
+router.get('/api/milestone/getRoomInfo', authMiddleware, async (req, res) => {
+
+    try {
+        const user = await userModel.findOne({token: req.headers['x-user-token']});
+
+        const roomId = user.roomId;
+
+        const room = await roomModel.findOne({ roomId });
+
+        let owners = [];
+
+        for(var i =0; i<room.owners.length; i++){
+            const ownerData = await userModel.findOne({ token: room.owners[i] });
+            if(ownerData){
+                owners.push({
+                    token: ownerData.token,
+                    name: ownerData.name,
+                    userImgUrl: ownerData.userImgUrl.url,
+                });
+            }
+        }
+
+        owners.sort((a, b) => a.token === user.token ? -1 : 1); // 將自己排在第一位
+        
+        return res.send({
+            type:'success',
+            message:'房間資訊獲取成功。',
+            data: {
+                roomId,
+                locked: room.locked,
+                owners,
+            }
+        });
+
+    } 
+    catch (e) {
+        console.log(e)
+        return res.send({
+            type:'error',
+            message:'伺服器錯誤，請洽客服人員協助。'
+        });
+    }
+});
+
+// 修改房間鎖定狀態
+router.put('/api/milestone/toggleLock', authMiddleware, async (req, res) => {
+
+    try {
+        const user = await userModel.findOne({token: req.headers['x-user-token']});
+
+        const roomId = user.roomId;
+
+        const room = await roomModel.findOne({ roomId });
+
+        if(!room.owners.includes(user.token)){
+            return res.send({
+                type:'error',
+                message:'您沒有權限修改房間鎖定狀態。'
+            });
+        }
+
+        room.locked = !room.locked;
+        await room.save();
+
+        return res.send({
+            type:'success',
+            message:'房間鎖定狀態修改成功。',
+            data: {
+                locked: room.locked,
+            }
+        });
+
+    } 
+    catch (e) {
         console.log(e)
         return res.send({
             type:'error',
