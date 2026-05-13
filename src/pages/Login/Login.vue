@@ -7,9 +7,10 @@
         <div class="normalForm">
           <div class="login"><div class="login_text">帳號：</div><input class="input" placeholder="請輸入帳號" v-model="loginData.account"></input></div>
           <div class="login"><div class="login_text">密碼：</div><input class="input" type="password" placeholder="請輸入密碼" v-model="loginData.password"></input></div>
+          <div class="login" v-if="mode == 'register'"><div class="login_text">邀請碼：</div><input class="input" type="text" placeholder="請輸入房間 ID（創建新房間請留空）" v-model="loginData.roomId"></input></div>
           <div class="btn_wrapper">
-            <button class="btn" @click="challenge('register')">會員註冊</button>
-            <button class="btn" @click="challenge('login')">會員登入</button>
+            <div class="changeMode" @click="changeMode()">{{ mode === 'login' ? '還不是會員？' : '已經註冊過了？' }}</div>
+            <button class="btn" @click="challenge()">{{ mode === 'login' ? '會員登入' : '創建帳號' }}</button>
           </div>
         </div>
     </div>
@@ -22,6 +23,7 @@ export default {
   name:'Login',
   data(){
     return {
+      mode: 'login',
       text:'',
       loginData:{
         account:'',
@@ -33,32 +35,29 @@ export default {
   mounted(){
   },
   methods:{
-
-    async challenge(type){
+    changeMode(){
+      if(this.mode == 'login') this.mode = 'register';
+      else if(this.mode == 'register') this.mode = 'login';
+    },
+    async challenge(){
 
       let url;
-      if(type == 'register'){
-
+      if(this.mode == 'register'){
         url = '/login/register'
 
         try {
-          
-            const { value } = await this.$prompt(
-              '創建或加入房間','系統訊息',
-              {
-                inputPlaceholder:'請輸入房間 ID（創建新房間請留空）',
-                confirmButtonText: '確認',
-                cancelButtonText: '取消',
-                customClass: 'PWACSS_MessageBox'
-              }
-            );
-            this.loginData.roomId = value;
-
-        } catch (e) {
-            return;
+          await this.$confirm('確定要創建帳號嗎？','創建帳號',{
+            confirmButtonText: '確定',
+            cancelButtonText: '取消',
+            type: 'warning',
+            customClass: 'PWACSS_MessageBox'
+          })
+        } 
+        catch (e) {
+          return;
         }
       }
-      else if(type == 'login') url = '/login/verify'
+      else if(this.mode == 'login') url = '/login/verify'
       else  window.location.reload();
 
       let data;
@@ -143,6 +142,12 @@ export default {
   .btn_wrapper{
     margin-top: 35px;
     float: right;
+  }
+  .changeMode{
+      display: inline-block;
+      margin-right: 3px;
+      color: brown;
+      font-size: 12px;
   }
   .btn{
     margin-left: 10px;
