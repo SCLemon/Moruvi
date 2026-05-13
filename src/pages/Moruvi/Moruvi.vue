@@ -18,7 +18,7 @@
                 <div class="route-icon"><i class="el-icon-bell"></i></div>
                 <div class="route-name">動態通知</div>
             </div>
-            <div class="route">
+            <div class="route" @click="logout()">
                 <div class="route-icon"><i class="el-icon-more-outline"></i></div>
                 <div class="route-name">更多</div>
             </div>
@@ -27,8 +27,15 @@
 </template>
 
 <script>
+import jsCookie from 'js-cookie';
+
 export default {
     name: 'Moruvi',
+    methods:{
+        logout(){
+            jsCookie.remove('authToken')
+        }
+    }
 
 }
 </script>

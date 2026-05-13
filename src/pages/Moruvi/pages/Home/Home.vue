@@ -22,7 +22,7 @@
               <div :class="{'first-content-partner-options-item': true, 'first-content-partner-options-item-disabled': roomInfo.owners[1]}" @click.stop="handlePartnerOption('invite')"><i class="fa-solid fa-plus first-content-partner-options-item-icon"></i> 發出邀請</div>
               <div :class="{'first-content-partner-options-item': true, 'first-content-partner-options-item-disabled': !roomInfo.owners[1]}" @click.stop="handlePartnerOption('poke')"><i class="fa-solid fa-bell first-content-partner-options-item-icon"></i> 戳戳對方</div>
               <div :class="{'first-content-partner-options-item': true, 'first-content-partner-options-item-disabled': !roomInfo.owners[1]}" @click.stop="handlePartnerOption('message')"><i class="fa-solid fa-envelope first-content-partner-options-item-icon"></i> 傳送訊息</div>
-              <div :class="{'first-content-partner-options-item': true, 'first-content-partner-options-item-disabled': !roomInfo.owners[1]}" @click.stop="handlePartnerOption('disconnect')"><i class="fa-solid fa-trash first-content-partner-options-item-icon"></i> 解除關係</div>
+              <div :class="{'first-content-partner-options-item': true, 'first-content-partner-options-item-disabled': !roomInfo.owners[1]}" @click.stop="handlePartnerOption('disconnect')"><i class="fa-solid fa-trash first-content-partner-options-item-icon" style="margin-right: 7px;"></i> 解除關係</div>
             </div>
           </div>
         </div>
