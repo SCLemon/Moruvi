@@ -1,3 +1,5 @@
+// for /moruvi/home
+
 // 全頁驗證機制
 const express = require('express');
 const router = express.Router();

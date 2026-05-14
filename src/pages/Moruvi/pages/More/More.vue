@@ -1,25 +1,25 @@
 <template>
   <div>
     <div class="user-box">
-        <img class="user-avator" src="img/user.png"></img>
+        <img class="user-avator" :src="overviewData.user?.userImgUrl || 'img/user.png'"></img>
         <div class="user-name-box">
-            <span class="user-name">小檸檬</span>
+            <span class="user-name">{{ overviewData.user.name }}</span>
         </div>
         <div class="user-member-no-box">
-            <div class="user-member-no">Moruvi #1</div>
+            <div class="user-member-no">{{ overviewData.user.memberNo }}</div>
         </div>
         <div class="user-overview-title">房間資訊</div>
         <div class="user-overview">
             <div class="user-overview-item">
-                <div class="user-overview-item-content">2026.05.14</div>
+                <div class="user-overview-item-content">{{overviewData.roomInfo.createTime}}</div>
                 <div class="user-overview-item-title">創建時間</div>
             </div>
             <div class="user-overview-item">
-                <div class="user-overview-item-content">甜蜜小屋</div>
+                <div class="user-overview-item-content">{{overviewData.roomInfo.roomName}}</div>
                 <div class="user-overview-item-title">房間名稱</div>
             </div>
             <div class="user-overview-item">
-                <div class="user-overview-item-content">小呆呆</div>
+                <div class="user-overview-item-content">{{overviewData.roomInfo.partner}}</div>
                 <div class="user-overview-item-title">親密夥伴</div>
             </div>
         </div>
@@ -35,8 +35,38 @@
 </template>
 
 <script>
+import axios from 'axios';
+import jsCookie from 'js-cookie';
 export default {
-    name:'More'
+    name:'More',
+    data(){
+        return{
+            overviewData:{
+                user:{},
+                roomInfo:{},
+            },
+        }
+    },
+    async mounted(){
+        await this.getData();
+    },
+    methods:{
+        async getData(){
+            try{
+                const res = await axios.get('/api/overview/getData',{
+                    headers:{
+                        'x-user-token': jsCookie.get('authToken')
+                    }
+                });
+                if(res.data.type == 'error'){
+                    this.$bus.$emit('handleAlert','系統訊息', res.data.message,res.data.type);
+                }
+                else{
+                    this.overviewData = res.data.data;
+                }
+            }catch(e){}  
+        },
+    }
 }
 </script>
 

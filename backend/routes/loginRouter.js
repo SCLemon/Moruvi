@@ -1,3 +1,5 @@
+// for /login
+
 // 全頁驗證機制
 const express = require('express');
 const router = express.Router();
@@ -102,7 +104,7 @@ router.post('/login/register', async (req, res) => {
             token,
             account,
             password,
-            MemberNo: `Moruvi #${existingCount + 1}`,
+            memberNo: `Moruvi #${existingCount + 1}`,
             name: `Moruvi #${existingCount + 1}`,
         });
 

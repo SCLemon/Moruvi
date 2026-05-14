@@ -118,10 +118,7 @@ export default {
             });
             this.list = res.data.data;
           }
-        }
-        catch(e){
-          console.log(e)
-        }  
+        }catch(e){}  
       },
       async getRoomInfo(){
         try{
