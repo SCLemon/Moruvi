@@ -9,7 +9,7 @@ Vue.config.productionTip = false
 // Vue.use(ElementUI);
 
 import {
-  Icon, Carousel, CarouselItem, Notification, MessageBox, DatePicker, Input
+  Icon, Carousel, CarouselItem, Notification, MessageBox, DatePicker, Input, Empty
 } from 'element-ui'
 
 
@@ -23,6 +23,7 @@ Vue.use(Carousel)
 Vue.use(CarouselItem)
 Vue.use(DatePicker)
 Vue.use(Input)
+Vue.use(Empty)
 
 // v-lazy
 Vue.directive('lazy', {

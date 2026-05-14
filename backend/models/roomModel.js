@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const roomSchema = new mongoose.Schema({
+    createTime:String,
     roomId:{
         type: String,
         trim: true,

@@ -31,7 +31,7 @@
         </div>
       </div>
     </div>
-    <div class="list-wrapper">
+    <div class="list-wrapper" v-if="list.length">
       <div class="list-item" v-for="(i,id) in list" :key="id" @click="openEdit(i)">
         <div class="list-item-icon"><i :class="icons[i.icon] || 'fa-solid fa-heart'"></i></div>
         <div class="list-item-content">
@@ -40,6 +40,9 @@
         </div>
         <div class="list-item-day"><span class="list-item-day-large">{{i.deltaDays}}</span> 天</div>
       </div>
+    </div>
+    <div class="list-wrapper list-wrapper-empty" v-else>
+      <el-empty description="篇章未開"></el-empty>
     </div>
   </div>
 </template>
@@ -333,6 +336,11 @@ export default {
     height: calc(100vh - 360px);
     box-sizing: border-box;
     overflow-y: scroll;
+  }
+  .list-wrapper-empty{
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   .list-item{
     width: 100%;

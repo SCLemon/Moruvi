@@ -2,7 +2,7 @@
     <div>
         <router-view class="view"></router-view>
         <div class="footer">
-            <div class="route">
+            <div class="route" @click="goTo('/moruvi/home')">
                 <div class="route-icon"><i class="el-icon-house"></i></div>
                 <div class="route-name">首頁</div>
             </div>
@@ -18,7 +18,7 @@
                 <div class="route-icon"><i class="el-icon-bell"></i></div>
                 <div class="route-name">動態通知</div>
             </div>
-            <div class="route" @click="logout()">
+            <div class="route" @click="goTo('/moruvi/more')">
                 <div class="route-icon"><i class="el-icon-more-outline"></i></div>
                 <div class="route-name">更多</div>
             </div>
@@ -27,14 +27,12 @@
 </template>
 
 <script>
-import jsCookie from 'js-cookie';
-
 export default {
     name: 'Moruvi',
     methods:{
-        logout(){
-            jsCookie.remove('authToken')
-        }
+        goTo(path) {
+            this.$router.replace(path).catch((e)=>{});
+        },
     }
 
 }

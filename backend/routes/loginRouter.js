@@ -53,36 +53,47 @@ router.post('/login/register', async (req, res) => {
             });
         }
 
-        const room = await roomModel.findOne({ roomId });
-        if(!roomId || !room){
+        if(!roomId){
             roomId = uuid();
             const dataBaseUrl = `${baseDir}${roomId}/`;
 
             fs.mkdirSync(dataBaseUrl, { recursive: true });
 
             const newRoom = new roomModel({
+                createTime: format(new Date(), 'yyyy.MM.dd'),
                 roomId,
                 owners: [token],
                 'database.url': dataBaseUrl,
             });
             await newRoom.save(); 
         }
-        else if(room.owners.length >= 2){
-            return res.send({
-                type:'error',
-                message:'房間已滿員，請選擇其他房間或建立新房間。'
-            });
+        else if(roomId){
+            const room = await roomModel.findOne({ roomId });
+            
+            if(!room){
+                return res.send({
+                    type:'error',
+                    message:'房間不存在，請選擇其他房間或建立新房間。'
+                });
+            }
+            else if(room.locked){
+                return res.send({
+                    type:'error',
+                    message:'房間已鎖定，請向房主申請解鎖。'
+                });
+            }
+            else if(room.owners.length >= 2){
+                return res.send({
+                    type:'error',
+                    message:'房間已滿員，請選擇其他房間或建立新房間。'
+                });
+            }
+            else{
+                room.owners.push(token);
+                await room.save();
+            }
         }
-        else if(room.locked){
-            return res.send({
-                type:'error',
-                message:'房間已鎖定，請向房主申請解鎖。'
-            });
-        }
-        else{
-            room.owners.push(token);
-            await room.save();
-        }
+        
 
         const existingCount = await userModel.countDocuments({});
         const newUser = new userModel({
@@ -91,6 +102,7 @@ router.post('/login/register', async (req, res) => {
             token,
             account,
             password,
+            MemberNo: `Moruvi #${existingCount + 1}`,
             name: `Moruvi #${existingCount + 1}`,
         });
 

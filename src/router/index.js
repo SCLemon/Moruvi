@@ -9,6 +9,7 @@ import Login from '../pages/Login/Login.vue'
 import Moruvi from '@/pages/Moruvi/Moruvi.vue'
 import Home from '../pages/Moruvi/pages/Home/Home.vue'
 import HomeModifier from '../pages/Moruvi/pages/HomeModifier/HomeModifier.vue'
+import More from '../pages/Moruvi/pages/More/More.vue'
 
 Vue.use(VueRouter)
 const router = new VueRouter({
@@ -32,6 +33,10 @@ const router = new VueRouter({
                 {
                     path:'home-modifier',
                     component: HomeModifier,
+                },
+                {
+                    path:'more',
+                    component: More,
                 },
                 {
                     path:'/',

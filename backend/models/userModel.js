@@ -25,6 +25,11 @@ const userSchema = new mongoose.Schema({
         required:true,
         trim: true,
     },
+    MemberNo:{
+        type: String,
+        trim: true,
+        default: 'Moruvi #NaN',
+    },
     name:{
         type: String,
         trim: true,
