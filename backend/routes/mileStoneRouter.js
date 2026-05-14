@@ -191,13 +191,14 @@ router.get('/api/milestone/getRoomInfo', authMiddleware, async (req, res) => {
             const ownerData = await userModel.findOne({ token: room.owners[i] });
             if(ownerData){
                 owners.push({
+                    token: ownerData.token,
                     name: ownerData.name,
                     userImgUrl: ownerData.userImgUrl.url,
                 });
             }
         }
 
-        owners.sort((a, b) => a.token === user.token ? -1 : 1); // 將自己排在第一位
+        owners.sort((a, b) => a.token === user.token ? -1 : 1).map(({ token, ...rest }) => rest); // 將自己排在第一位
         
         return res.send({
             type:'success',

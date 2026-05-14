@@ -11,7 +11,6 @@
         <div class="user-member-no-box">
             <div class="user-member-no">{{ overviewData.user.memberNo }}</div>
         </div>
-        <div class="user-overview-title">房間資訊</div>
         <div class="user-overview">
             <div class="user-overview-item">
                 <div class="user-overview-item-content">{{overviewData.roomInfo.createTime}}</div>
@@ -23,7 +22,7 @@
             </div>
             <div class="user-overview-item">
                 <div class="user-overview-item-content">{{overviewData.roomInfo.partner}}</div>
-                <div class="user-overview-item-title">親密夥伴</div>
+                <div class="user-overview-item-title">親密伴侶</div>
             </div>
         </div>
         <div class="user-option-box">
@@ -88,7 +87,7 @@ export default {
                 const file = files[0];
 
                 this.userAvatorStatus.status = '圖片壓縮中...';
-                const compressedFile = await compressImage(file, 200);
+                const compressedFile = await compressImage(file, 250);
                 console.log(`原始: ${(file.size / 1024).toFixed(1)} KB → 壓縮後: ${(compressedFile.size / 1024).toFixed(1)} KB`);
 
                 this.userAvatorStatus.status = '準備上傳...';
@@ -117,7 +116,7 @@ export default {
                 }, 3000)
             }
             finally{
-
+                this.$refs.uploadUserAvator.value = ''
             }
         }
     }
@@ -155,8 +154,7 @@ export default {
         color: white;
     }
     .user-avator{
-        width: 100px;
-        height: 100px;
+        width: 100%;
     }
     .user-name-box{
         width: 100%;
@@ -172,7 +170,7 @@ export default {
     }
     .user-member-no-box{
         width: 100%;
-        margin-top: 12px;
+        margin-top: 14px;
         display: flex;
         justify-content: center;
     }
@@ -184,15 +182,8 @@ export default {
         background: pink;
         color: white;
     }
-    .user-overview-title{
-        margin-left: 12px;
-        margin-top: 10px;
-        margin-bottom: 10px;
-        font-size: 14px;
-        color: pink;
-    }
     .user-overview{
-        margin-top:5px;
+        margin-top:10px;
         width: 100%;
         display: flex;
         justify-content: space-evenly;
