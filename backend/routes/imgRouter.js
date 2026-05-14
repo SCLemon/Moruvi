@@ -1,5 +1,5 @@
 
-// for /login
+// 涉及圖片上傳的統一管理文件
 
 // 全頁驗證機制
 const express = require('express');
