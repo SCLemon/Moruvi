@@ -3,13 +3,7 @@ const path = require('path');
 const fs = require('fs');
 
 
-// 跨平台基準路徑
-const tmpDirMap = {
-  win32: 'D:/sky_database/sky_tmp',
-  darwin: '/Volumes/sky_database/sky_tmp'
-};
-
-const tmpDir = tmpDirMap[process.platform] || '/mnt/sky_database/sky_tmp';
+const { tmpDir } = require('./pathConfig');
 
 // 建立 tmp dir
 fs.mkdirSync(tmpDir, { recursive: true });

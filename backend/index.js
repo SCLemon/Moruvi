@@ -56,6 +56,9 @@ app.use(mileStoneRouter);
 const overviewRouter = require('./routes/overviewRouter');
 app.use(overviewRouter);
 
+const imgRouter = require('./routes/imgRouter');
+app.use(imgRouter);
+
 const {router: serviceWorkerRouter} = require('./routes/service-worker/serviceWorkerRouter')
 app.use(serviceWorkerRouter)
 

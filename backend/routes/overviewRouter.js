@@ -23,7 +23,7 @@ router.get('/api/overview/getData', authMiddleware, async (req, res) => {
             partner:{}
         },
     };
-
+    
     try {
         const user = await userModel.findOne({token: req.headers['x-user-token']});
 
@@ -34,7 +34,7 @@ router.get('/api/overview/getData', authMiddleware, async (req, res) => {
         const roomId = user.roomId;
 
         let roomData = await roomModel.findOne({ roomId });
-
+        
         output.roomInfo.createTime = roomData.createTime;
         output.roomInfo.roomName = roomData.roomName;
 

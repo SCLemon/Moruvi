@@ -11,13 +11,8 @@ const {format} = require('date-fns');
 const { uuid } = require('uuidv4');
 const fs = require('fs');
 
-// 跨平台基準路徑
-const baseDirMap = {
-  win32: 'D:/moruvi_database/local/',
-  darwin: '/Volumes/moruvi_database/local/'
-};
-const baseDir = baseDirMap[process.platform] || '/mnt/moruvi_database/local/';
 
+const { baseDir } = require('../config/pathConfig')
 
 function historyGenerator(req){
     return {

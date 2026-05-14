@@ -1,7 +1,10 @@
 <template>
   <div>
     <div class="user-box">
-        <img class="user-avator" :src="overviewData.user?.userImgUrl || 'img/user.png'"></img>
+        <div class="user-avator-wrapper">
+            <div class="user-avator-mask" v-if="userAvatorStatus.processing">{{ userAvatorStatus.status }}</div>
+            <img class="user-avator" :src="overviewData.user?.userImgUrl || 'img/user.png'" @click="openUpload()">
+        </div>
         <div class="user-name-box">
             <span class="user-name">{{ overviewData.user.name }}</span>
         </div>
@@ -31,16 +34,22 @@
         </div>
     </div>
     <router-view class="router-view"></router-view>
+    <input type="file" ref="uploadUserAvator" style="display: none;" @change="onUpload()" accept="image/*" multiple="false">
   </div>
 </template>
 
 <script>
 import axios from 'axios';
 import jsCookie from 'js-cookie';
+import { compressImage } from "../../../../utils/js/compressor"
 export default {
     name:'More',
     data(){
         return{
+            userAvatorStatus:{
+                processing: false,
+                status: '',
+            },
             overviewData:{
                 user:{},
                 roomInfo:{},
@@ -66,6 +75,51 @@ export default {
                 }
             }catch(e){}  
         },
+        openUpload(){
+            this.$refs.uploadUserAvator.click();
+        },
+        async onUpload(){
+            this.userAvatorStatus.processing = true;
+            try{
+
+                this.userAvatorStatus.status = '程序開始執行...';
+                const files = this.$refs.uploadUserAvator.files;
+                if(!files) return;
+                const file = files[0];
+
+                this.userAvatorStatus.status = '圖片壓縮中...';
+                const compressedFile = await compressImage(file, 200);
+                console.log(`原始: ${(file.size / 1024).toFixed(1)} KB → 壓縮後: ${(compressedFile.size / 1024).toFixed(1)} KB`);
+
+                this.userAvatorStatus.status = '準備上傳...';
+                let formData = new FormData();
+                formData.append("attachments", compressedFile);
+                const res = await axios.post("/api/img/updateUserAvator", formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                        "x-user-token": jsCookie.get('authToken'),
+                    },
+                    onUploadProgress:(progressEvent) => {
+                        const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                        this.userAvatorStatus.status = percent + '%';
+                    },
+                })
+                if(res.data.type == 'success') await this.getData();
+                else this.$bus.$emit('handleAlert','頭像上傳通知',res.data.message,res.data.type)
+                this.userAvatorStatus.processing = false;
+                this.userAvatorStatus.status = '';
+            }
+            catch(e){
+                this.userAvatorStatus.status = '異常錯誤...';
+                setTimeout(()=>{
+                    this.userAvatorStatus.processing = false;
+                    this.userAvatorStatus.status = '';
+                }, 3000)
+            }
+            finally{
+
+            }
+        }
     }
 }
 </script>
@@ -76,7 +130,7 @@ export default {
         border-bottom: 0.1px solid rgba(230,230,230);
         box-sizing: border-box;
     }
-    .user-avator{
+    .user-avator-wrapper{
         width: 100px;
         height: 100px;
         border-radius: 50%;
@@ -85,6 +139,24 @@ export default {
         border: 0.1px solid rgba(0,0,0,0.3);
         box-sizing: border-box;
         display: block;
+        position: relative;
+        overflow: hidden;
+    }
+    .user-avator-mask{
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        top:0;
+        left:0;
+        background: rgba(0,0,0,0.4);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+    }
+    .user-avator{
+        width: 100px;
+        height: 100px;
     }
     .user-name-box{
         width: 100%;
