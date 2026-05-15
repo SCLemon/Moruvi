@@ -9,7 +9,7 @@ webpush.setVapidDetails("mailto:blc0000421@gmail.com",publicKey, privateKey);
 
 // 訂閱
 router.post("/api/ws/save-subscribe", async (req, res) => {
-  const deviceFingerprint = req.headers['x-user-fingerprint']
+  const token = req.headers['x-user-token']
   try {
     const { subscription } = req.body;
 
@@ -17,7 +17,7 @@ router.post("/api/ws/save-subscribe", async (req, res) => {
       return res.send({ type:'error', message: "缺少訂閱資訊" });
     }
 
-    const existing = await subscribeModel.findOne({ deviceFingerprint });
+    const existing = await subscribeModel.findOne({ token });
 
     if (existing) {
       existing.subscription = subscription;
@@ -25,7 +25,7 @@ router.post("/api/ws/save-subscribe", async (req, res) => {
       return res.send({ type:'success', message: "更新訂閱資訊" });
     }
 
-    await subscribeModel.create({ deviceFingerprint, subscription });
+    await subscribeModel.create({ token, subscription });
 
     return res.send({ type:'success', message: "已儲存訂閱資訊" });
   } 
@@ -37,9 +37,9 @@ router.post("/api/ws/save-subscribe", async (req, res) => {
 
 // 裝置訂閱狀態
 router.get('/api/ws/check-subscribe', async (req, res) => {
-  const deviceFingerprint = req.headers['x-user-fingerprint'];
+  const token = req.headers['x-user-token'];
   try {
-    const existing = await subscribeModel.findOne({ deviceFingerprint });
+    const existing = await subscribeModel.findOne({ token });
     if (existing) {
       return res.send({ type:'success', message: "已訂閱", subscribed: true });
     }
@@ -65,7 +65,7 @@ async function pushNotification(title = '檸檬小天地', message = '你有一�
       } 
       catch (err) {
         if (err?.statusCode === 410 || err?.statusCode === 404) {
-          await subscribeModel.deleteOne({ deviceFingerprint: s.deviceFingerprint });
+          await subscribeModel.deleteOne({ token: s.token });
         } 
         else {
           console.log("push error:", err?.statusCode, err?.message);

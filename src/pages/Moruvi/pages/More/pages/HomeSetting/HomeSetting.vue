@@ -16,7 +16,7 @@
         </div>
     </div>
     <div class="button-wrapper">
-        <button :class="{'send-button': true, 'send-button-enabled': sendEnabled && !uploadStatus.uploading}" @click="uploadStatus.uploading?'':modify()">{{ uploadStatus.uploading ? uploadStatus.status : '保存' }}</button>
+        <button :class="{'send-button': true, 'send-button-enabled': sendEnabled && !uploadStatus.uploading}" @click="(sendEnabled && !uploadStatus.uploading)?modify():''">{{ uploadStatus.uploading ? uploadStatus.status : '保存' }}</button>
     </div>
   </div>
   
@@ -56,7 +56,7 @@ export default {
       copyId(){
         try{
           navigator.clipboard.writeText(this.form.roomId);
-          this.$bus.$emit('handleAlert','系統訊息', '房間 ID 已複製到剪貼簿，請將此 ID 發送給對方以建立連結','success');
+          this.$bus.$emit('handleAlert','系統訊息', '房間 ID (邀請碼) 已複製到剪貼簿。','success');
         }
         catch(e){
           this.$bus.$emit('handleAlert','邀請碼', this.form.roomId,'success');

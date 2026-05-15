@@ -12,7 +12,8 @@ const { uuid } = require('uuidv4');
 const fs = require('fs');
 
 
-const { baseDir } = require('../config/pathConfig')
+const { baseDir } = require('../config/pathConfig');
+const path = require('path');
 
 function historyGenerator(req){
     return {
@@ -52,7 +53,7 @@ router.post('/login/register', async (req, res) => {
 
         if(!roomId){
             roomId = uuid();
-            const dataBaseUrl = `${baseDir}${roomId}/`;
+            const dataBaseUrl = path.join(baseDir,'room',roomId);
 
             fs.mkdirSync(dataBaseUrl, { recursive: true });
 

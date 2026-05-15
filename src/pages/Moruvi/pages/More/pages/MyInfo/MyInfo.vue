@@ -7,7 +7,7 @@
       <div class="form-item"><div class="form-input-title">信箱：</div><input class="input" placeholder="請輸入信箱地址" v-model="form.mailAddress"></div>
     </div>
     <div class="button-wrapper">
-        <button :class="{'send-button': true, 'send-button-enabled': sendEnabled && !uploadStatus.uploading}" @click="uploadStatus.uploading?'':modify()">{{ uploadStatus.uploading ? uploadStatus.status : '保存' }}</button>
+        <button :class="{'send-button': true, 'send-button-enabled': sendEnabled && !uploadStatus.uploading}" @click="(sendEnabled && !uploadStatus.uploading)?modify():''">{{ uploadStatus.uploading ? uploadStatus.status : '保存' }}</button>
     </div>
   </div>
   

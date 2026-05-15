@@ -35,6 +35,8 @@ router.post('/api/img/updateUserAvator',authMiddleware,upload.fields([{ name: 'a
         const file = req.files?.attachments?.[0];
             
         if (!file) return res.send({ type:'error', message:'上傳頭像不可為空。'});
+        
+        if (!fs.existsSync(avatarDir)) fs.mkdirSync(avatarDir, { recursive: true });
 
         const user = await userModel.findOne({ token });
         let originalPath = user.userImgUrl.original;

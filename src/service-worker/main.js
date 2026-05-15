@@ -1,12 +1,10 @@
 
 import axios from "axios";
+import jsCookie from "js-cookie";
 
 const publicVapidKey = 'BDaELLgGYNHLi1choUSCQFtfKmP56DV1f7TJunGM_dqPRgQosEoflD4xEiLYG4DTypK4DWmdZ5H27XthqyYRm0g';
 
 // 產生裝置指紋
-async function generateFingerprint() {
-  return Math.random()*100000000;
-}
 
 // 註冊 ServiceWorker
 async function registerServiceWorker() {
@@ -62,7 +60,7 @@ async function subscribe() {
       },
       {
         headers:{
-          'x-user-fingerprint': await generateFingerprint()
+          'x-user-token': jsCookie.get('authToken')
         }
       });
       return { type: res.data.type, message: res.data.message };
@@ -79,7 +77,7 @@ async function checkSubscribed(){
     const res = await axios.get("/api/ws/check-subscribe",
     {
       headers:{
-        'x-user-fingerprint': await generateFingerprint()
+        'x-user-token': jsCookie.get('authToken')
       }
     });
     return res.data.subscribed;
@@ -98,5 +96,5 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 export {
-   generateFingerprint, registerServiceWorker, subscribe, checkSubscribed
+  registerServiceWorker, subscribe, checkSubscribed
 }
