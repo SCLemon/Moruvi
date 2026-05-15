@@ -62,6 +62,9 @@ app.use(imgRouter);
 const myInfoRouter = require('./routes/myInfoRouter');
 app.use(myInfoRouter);
 
+const homeSettingRouter = require('./routes/homeSettingRouter');
+app.use(homeSettingRouter);
+
 const {router: serviceWorkerRouter} = require('./routes/service-worker/serviceWorkerRouter')
 app.use(serviceWorkerRouter)
 

@@ -1,10 +1,10 @@
 <template>
   <div>
     <div class="form">
-      <div class="form-item"><div class="form-input-title">帳號：</div><input class="input" disabled placeholder="請輸入帳號" :value="form.account"></input></div>
-      <div class="form-item"><div class="form-input-title">密碼：</div><input class="input" type="password" placeholder="請輸入密碼" v-model="form.password"></input></div>
-      <div class="form-item"><div class="form-input-title">暱稱：</div><input class="input" placeholder="請輸入暱稱" v-model="form.name"></input></div>
-      <div class="form-item"><div class="form-input-title">信箱：</div><input class="input" placeholder="請輸入信箱地址" v-model="form.mailAddress"></input></div>
+      <div class="form-item"><div class="form-input-title">帳號：</div><input class="input" disabled placeholder="帳號" :value="form.account"></div>
+      <div class="form-item"><div class="form-input-title">密碼：</div><input class="input" type="password" placeholder="請輸入密碼" v-model="form.password"></div>
+      <div class="form-item"><div class="form-input-title">暱稱：</div><input class="input" placeholder="請輸入暱稱" v-model="form.name"></div>
+      <div class="form-item"><div class="form-input-title">信箱：</div><input class="input" placeholder="請輸入信箱地址" v-model="form.mailAddress"></div>
     </div>
     <div class="button-wrapper">
         <button :class="{'send-button': true, 'send-button-enabled': sendEnabled && !uploadStatus.uploading}" @click="uploadStatus.uploading?'':modify()">{{ uploadStatus.uploading ? uploadStatus.status : '保存' }}</button>
@@ -118,8 +118,8 @@ export default {
   .button-wrapper{
     width: 100%;
     margin: 0 auto;
-    padding-left: 15px;
-    padding-right: 15px;
+    padding-left: 12.5px;
+    padding-right: 12.5px;
     box-sizing: border-box;
   }
   .send-button{

@@ -1,6 +1,7 @@
 <template>
   <div>
     <div class="user-box">
+        <div class="logout" @click="logout()">登出</div>
         <div class="user-avator-wrapper">
             <div class="user-avator-mask" v-if="userAvatorStatus.processing">{{ userAvatorStatus.status }}</div>
             <img class="user-avator" :src="overviewData.user?.userImgUrl || 'img/user.png'" @click="openUpload()">
@@ -61,6 +62,19 @@ export default {
     methods:{
         goTo(path) {
             this.$router.replace(path).catch((e)=>{});
+        },
+        async logout(){
+            try{
+                await this.$confirm('確認是否登出此帳號？','登出帳號',{
+                    type:'warning',
+                    confirmButtonText:'確認',
+                    cancelButtonText:'取消',
+                    customClass: 'PWACSS_MessageBox'
+                })
+                jsCookie.remove('authToken');
+                this.goTo('/login');
+            }
+            catch(e){}
         },
         async getData(){
             try{
@@ -131,6 +145,19 @@ export default {
         width: 100%;
         border-bottom: 0.1px solid rgba(230,230,230);
         box-sizing: border-box;
+        position: relative;
+    }
+    .logout{
+        position: absolute;
+        right: 15px;
+        top: 12.5px;
+        background: pink;
+        border-radius: 5px;
+        color: white;
+        box-sizing: border-box;
+        padding: 7.5px 12.5px 7.5px 12.5px;
+        text-align: center;
+        font-size: 14px;
     }
     .user-avator-wrapper{
         width: 100px;
