@@ -164,7 +164,7 @@ export default {
         height: 100px;
         border-radius: 50%;
         margin: 0 auto;
-        margin-top: 20px;
+        margin-top: 30px;
         border: 0.1px solid rgba(0,0,0,0.3);
         box-sizing: border-box;
         display: block;
@@ -258,7 +258,7 @@ export default {
     }
     .router-view{
         width: 100%;
-        height: calc(100vh - 390.5px);
+        height: calc(100vh - 400.5px);
         box-sizing: border-box;
         /* border: 1px solid red; */
     }
