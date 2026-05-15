@@ -24,7 +24,7 @@ async function registerServiceWorker() {
     }
   }
   else {
-    return { type:'error',message: '本裝置不支援 Service Worker 訂閱服務'};
+    return { type:'error',message: '本裝置不支援 Service Worker 訂閱'};
   }
 }
 

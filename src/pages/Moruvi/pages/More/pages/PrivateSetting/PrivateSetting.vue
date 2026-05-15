@@ -16,7 +16,7 @@
         <div class="info-box-title">訂閱設置</div>
         <div class="info-box-button-wrapper">
             <template v-if="!isProcessing">
-                <button class="info-box-button info-box-button-1" @click="!isProcessing?subscribe():''">更新</button>
+                <button class="info-box-button info-box-button-1" @click="!isProcessing?subscribe():''">{{ subscribeInfo.status ? '更新':'訂閱' }}</button>
                 <button class="info-box-button info-box-button-2" @click="!isProcessing?cancel():''">關閉</button>
             </template>
             <div class="info-box-content" v-else>正在執行中</div>
