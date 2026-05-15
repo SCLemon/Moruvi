@@ -209,7 +209,7 @@ export default {
     .send-button{
         width: 100%;
         margin-top: 20px;
-        background-color: #FF5C8A;
+        background-color: #ff7ea3;
         color: white;
         border: none;
         border-radius: 4px;

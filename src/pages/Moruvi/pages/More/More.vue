@@ -233,6 +233,6 @@ export default {
         width: 100%;
         height: calc(100vh - 390.5px);
         box-sizing: border-box;
-        border: 1px solid red;
+        /* border: 1px solid red; */
     }
 </style>
