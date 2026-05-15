@@ -260,6 +260,6 @@ export default {
         width: 100%;
         height: calc(100vh - 400.5px);
         box-sizing: border-box;
-        /* border: 1px solid red; */
+        overflow-y: scroll;
     }
 </style>
