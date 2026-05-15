@@ -11,54 +11,92 @@ const { format } = require('date-fns');
 
 function getDeviceModel(userAgent) {
 
-    // iPhone
-    if (/iPhone/.test(userAgent)) {
+    // ===== Apple =====
+
+    if (/iPhone/.test(userAgent))
         return 'iPhone';
-    }
 
-    // iPad
-    if (/iPad/.test(userAgent)) {
+    if (/iPad/.test(userAgent))
         return 'iPad';
-    }
 
-    // Samsung
-    let samsung = userAgent.match(/SM-[A-Z0-9]+/);
-    if (samsung) {
+    if (/Macintosh|Mac OS X/.test(userAgent))
+        return 'Mac';
+
+    // ===== Windows =====
+
+    if (/Windows NT 10/.test(userAgent))
+        return 'Windows 10/11';
+
+    if (/Windows NT 6\.3/.test(userAgent))
+        return 'Windows 8.1';
+
+    if (/Windows NT 6\.1/.test(userAgent))
+        return 'Windows 7';
+
+    if (/Windows/.test(userAgent))
+        return 'Windows';
+
+    // ===== Linux =====
+
+    if (/Linux/.test(userAgent) &&
+        !/Android/.test(userAgent))
+        return 'Linux';
+
+    // ===== Samsung =====
+
+    let samsung =
+        userAgent.match(/SM-[A-Z0-9]+/);
+
+    if (samsung)
         return samsung[0];
-    }
 
-    // Xiaomi
-    let xiaomi = userAgent.match(/Mi\s[A-Z0-9]+|Redmi\s[A-Z0-9]+/i);
-    if (xiaomi) {
+    // ===== Xiaomi =====
+
+    let xiaomi =
+        userAgent.match(
+            /Mi\s[A-Z0-9]+|Redmi\s[A-Z0-9]+/i
+        );
+
+    if (xiaomi)
         return xiaomi[0];
-    }
 
-    // Pixel
-    let pixel = userAgent.match(/Pixel\s\d+/i);
-    if (pixel) {
+    // ===== Google Pixel =====
+
+    let pixel =
+        userAgent.match(/Pixel\s\d+/i);
+
+    if (pixel)
         return pixel[0];
-    }
 
-    // Huawei
-    let huawei = userAgent.match(/HUAWEI\s[A-Z0-9-]+/i);
-    if (huawei) {
+    // ===== Huawei =====
+
+    let huawei =
+        userAgent.match(
+            /HUAWEI\s[A-Z0-9-]+/i
+        );
+
+    if (huawei)
         return huawei[0];
-    }
 
-    // OPPO / Vivo
-    let oppo = userAgent.match(/CPH\d+|V\d+/);
-    if (oppo) {
+    // ===== OPPO / Vivo =====
+
+    let oppo =
+        userAgent.match(/CPH\d+|V\d+/);
+
+    if (oppo)
         return oppo[0];
-    }
 
-    // Generic Android
+    // ===== Android Generic =====
+
     if (/Android/.test(userAgent)) {
-        let model =
-            userAgent.match(/Android.*?;\s([^)]+)\sBuild/i);
 
-        if (model) {
+        let model =
+            userAgent.match(
+                /Android.*?;\s([^)]+)\sBuild/i
+            );
+
+        if (model)
             return model[1].trim();
-        }
 
         return 'Android';
     }

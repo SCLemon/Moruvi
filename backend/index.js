@@ -63,8 +63,8 @@ app.use(homeSettingRouter);
 const subscribeRouter = require('./routes/subscribeRouter');
 app.use(subscribeRouter);
 
-const {router: serviceWorkerRouter} = require('./routes/service-worker/serviceWorkerRouter')
-app.use(serviceWorkerRouter)
+const notifyRouter = require('./routes/notifyRouter');
+app.use(notifyRouter);
 
 app.listen(3008,()=>{
     console.log('server is running on port 3008')

@@ -161,7 +161,7 @@ export default {
       togglePartnerOptions(){
         this.showPartnerOptions = !this.showPartnerOptions;
       },
-      handlePartnerOption(option){
+      async handlePartnerOption(option){
         switch(option){
           case 'invite':
             // 發出邀請
@@ -171,6 +171,7 @@ export default {
           case 'poke':
             // 戳戳對方
             if(this.roomInfo.owners.length < 2) return;
+            await this.poke();
             break;
           case 'message':
             // 傳送訊息
@@ -197,6 +198,23 @@ export default {
         }
         catch(e){
           this.$bus.$emit('handleAlert','邀請碼', this.roomInfo.roomId,'success');
+        }
+        this.showPartnerOptions = false;
+      },
+      async poke(){
+        try{
+          const res = await axios.get('/api/notify/poke',{
+            headers:{
+              'x-user-token': jsCookie.get('authToken')
+            }
+          });
+          if(res.data.type == 'error'){
+            this.$bus.$emit('handleAlert','系統訊息', res.data.message,res.data.type);
+          }
+          else this.$bus.$emit('handleAlert','戳戳對方', '您成功戳了對方一下 🥰🥰', 'success');
+        }
+        catch(e){
+          console.log(e)
         }
         this.showPartnerOptions = false;
       }

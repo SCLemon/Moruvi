@@ -18,8 +18,6 @@ export default {
   async mounted(){
     this.$bus.$on('handleAlert',this.handleAlert)
     this.$bus.$on('copyToClipboard',this.copyToClipboard)
-
-    await this.generateFingerprint();
     registerServiceWorker();
   },
   methods:{
