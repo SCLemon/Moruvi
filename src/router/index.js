@@ -11,6 +11,11 @@ import Home from '../pages/Moruvi/pages/Home/Home.vue'
 import HomeModifier from '../pages/Moruvi/pages/HomeModifier/HomeModifier.vue'
 import More from '../pages/Moruvi/pages/More/More.vue'
 
+import MyInfo from '@/pages/Moruvi/pages/More/pages/MyInfo/MyInfo.vue'
+import HomeSetting from '@/pages/Moruvi/pages/More/pages/HomeSetting/HomeSetting.vue'
+import PrivateSetting from '@/pages/Moruvi/pages/More/pages/PrivateSetting/PrivateSetting.vue'
+import ProgramInfo from '@/pages/Moruvi/pages/More/pages/ProgramInfo/ProgramInfo.vue'
+
 Vue.use(VueRouter)
 const router = new VueRouter({
     routes:[
@@ -37,6 +42,28 @@ const router = new VueRouter({
                 {
                     path:'more',
                     component: More,
+                    children:[
+                        {
+                            path:'my-info',
+                            component: MyInfo,
+                        },
+                        {
+                            path:'home-setting',
+                            component: HomeSetting,
+                        },
+                        {
+                            path:'private-setting',
+                            component: PrivateSetting,
+                        },
+                        {
+                            path:'program-info',
+                            component: ProgramInfo,
+                        },
+                        {
+                            path:'/',
+                            redirect:'my-info'
+                        },
+                    ]
                 },
                 {
                     path:'/',
@@ -60,9 +87,8 @@ router.beforeEach(async (to, from, next) => {
     if (allowedPaths.includes(to.path)) {
         return next()
     }
-    if (!token) {
-        console.log('hwew')
-    }
+    
+    if (!token) return next('/login')
     
     const res = await axios.post('/login/token',{save:false},{
         headers:{

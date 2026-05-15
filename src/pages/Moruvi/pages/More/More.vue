@@ -26,14 +26,14 @@
             </div>
         </div>
         <div class="user-option-box">
-            <div class="user-option user-option-selected"><i class="fa-solid fa-circle-user"></i></div>
-            <div class="user-option"><i class="fa-solid fa-house"></i></div>
-            <div class="user-option"><i class="fa-solid fa-bell"></i></div>
-            <div class="user-option"><i class="fa-solid fa-circle-info"></i></div>
+            <div :class="{'user-option':true, 'user-option-selected':$route.path.includes('/my-info')}" @click="goTo('/moruvi/more/my-info')"><i class="fa-solid fa-circle-user"></i></div>
+            <div :class="{'user-option':true, 'user-option-selected':$route.path.includes('/home-setting')}" @click="goTo('/moruvi/more/home-setting')"><i class="fa-solid fa-house"></i></div>
+            <div :class="{'user-option':true, 'user-option-selected':$route.path.includes('/private-setting')}" @click="goTo('/moruvi/more/private-setting')"><i class="fa-solid fa-bell"></i></div>
+            <div :class="{'user-option':true, 'user-option-selected':$route.path.includes('/program-info')}" @click="goTo('/moruvi/more/program-info')"><i class="fa-solid fa-circle-info"></i></div>
         </div>
     </div>
-    <router-view class="router-view"></router-view>
     <input type="file" ref="uploadUserAvator" style="display: none;" @change="onUpload()" accept="image/*" multiple="false">
+    <router-view class="router-view"></router-view>
   </div>
 </template>
 
@@ -59,6 +59,9 @@ export default {
         await this.getData();
     },
     methods:{
+        goTo(path) {
+            this.$router.replace(path).catch((e)=>{});
+        },
         async getData(){
             try{
                 const res = await axios.get('/api/overview/getData',{
@@ -228,7 +231,7 @@ export default {
     }
     .router-view{
         width: 100%;
-        height: calc(100vh - 402.8px);
+        height: calc(100vh - 390.5px);
         box-sizing: border-box;
         border: 1px solid red;
     }
