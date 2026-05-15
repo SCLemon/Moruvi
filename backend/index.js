@@ -13,7 +13,7 @@ const rateLimit = require('express-rate-limit');
 
 // 不受限速
 const whitelistRoutes = [
-    '/api/image',
+    '/api/img',
 ];
 
 const limiter = rateLimit({
@@ -42,11 +42,6 @@ app.use((req, res, next) => {
 const { connectToDatabase, disconnectFromDatabase } = require('./db/db');
 connectToDatabase();
 
-process.on('SIGINT', function() {
-    disconnectFromDatabase();
-    process.exit(0);
-});
-
 const loginRouter = require('./routes/loginRouter');
 app.use(loginRouter);
 
@@ -65,12 +60,20 @@ app.use(myInfoRouter);
 const homeSettingRouter = require('./routes/homeSettingRouter');
 app.use(homeSettingRouter);
 
+const subscribeRouter = require('./routes/subscribeRouter');
+app.use(subscribeRouter);
+
 const {router: serviceWorkerRouter} = require('./routes/service-worker/serviceWorkerRouter')
 app.use(serviceWorkerRouter)
 
 app.listen(3008,()=>{
     console.log('server is running on port 3008')
 })
+
+process.on('SIGINT', function() {
+    disconnectFromDatabase();
+    process.exit(0);
+});
 
 // 避免系統中斷
 process.on('uncaughtException', (err) => {

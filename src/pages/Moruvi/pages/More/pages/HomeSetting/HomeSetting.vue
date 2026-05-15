@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="form">
-        <div class="form-item"><div class="form-input-title">ID：</div><input class="input" placeholder="房間 ID" @click="copyId()" readonly :value="form.roomId"></div>
+        <div class="form-item"><div class="form-input-title">邀請碼：</div><input class="input" placeholder="房間 ID" @click="copyId()" readonly :value="form.roomId"></div>
         <div class="form-item"><div class="form-input-title">房名：</div><input class="input" placeholder="請輸入房間名稱" v-model="form.roomName"></div>
         <div class="form-item"><div class="form-input-title">狀態：
         </div>
@@ -109,8 +109,8 @@ export default {
   }
   .form-item{
     width: 100%;
-    padding-left: 15px;
-    padding-right: 15px;
+    padding-left: 20px;
+    padding-right: 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -119,6 +119,7 @@ export default {
   }
   .form-input-title{
     width: 60px;
+    font-size: 14px;
   }
   .input{
     width: calc(100% - 70px);
@@ -127,7 +128,7 @@ export default {
     box-sizing: border-box;
     border: 1px solid #ccc;
     border-radius: 4px;
-    font-size: 15px;
+    font-size: 14px;
     color: rgba(0,0,0,0.5);
   }
   .input:focus{

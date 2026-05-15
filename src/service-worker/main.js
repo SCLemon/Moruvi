@@ -1,10 +1,8 @@
 
-import axios from "axios";
-import jsCookie from "js-cookie";
+
 
 const publicVapidKey = 'BDaELLgGYNHLi1choUSCQFtfKmP56DV1f7TJunGM_dqPRgQosEoflD4xEiLYG4DTypK4DWmdZ5H27XthqyYRm0g';
 
-// 產生裝置指紋
 
 // 註冊 ServiceWorker
 async function registerServiceWorker() {
@@ -30,8 +28,8 @@ async function registerServiceWorker() {
   }
 }
 
-// 進行裝置訂閱
-async function subscribe() {
+// 取得裝置訂閱
+async function getSubscription() {
 
   const registerResult = await registerServiceWorker();
   if(registerResult.type == 'error') return registerResult;
@@ -53,40 +51,8 @@ async function subscribe() {
     applicationServerKey: urlBase64ToUint8Array(publicVapidKey),
   });
 
-  // 傳給後端儲存
-  try{
-      const res = await axios.post("/api/ws/save-subscribe", {
-        subscription: sub
-      },
-      {
-        headers:{
-          'x-user-token': jsCookie.get('authToken')
-        }
-      });
-      return { type: res.data.type, message: res.data.message };
-  }
-  catch(e){
-    return { type:'error',message: '推播訂閱失敗'};
-  }
-
+  return sub;
 }
-
-// 裝置訂閱狀態
-async function checkSubscribed(){
-  try{
-    const res = await axios.get("/api/ws/check-subscribe",
-    {
-      headers:{
-        'x-user-token': jsCookie.get('authToken')
-      }
-    });
-    return res.data.subscribed;
-  }
-  catch(e){
-    return false;
-  }
-}
-
 
 function urlBase64ToUint8Array(base64String) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -96,5 +62,5 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 export {
-  registerServiceWorker, subscribe, checkSubscribed
+  registerServiceWorker, getSubscription
 }

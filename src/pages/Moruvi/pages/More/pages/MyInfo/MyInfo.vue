@@ -88,8 +88,8 @@ export default {
   }
   .form-item{
     width: 100%;
-    padding-left: 15px;
-    padding-right: 15px;
+    padding-left: 20px;
+    padding-right: 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -98,6 +98,7 @@ export default {
   }
   .form-input-title{
     width: 60px;
+    font-size: 14px;
   }
   .input{
     width: calc(100% - 70px);
@@ -106,7 +107,7 @@ export default {
     box-sizing: border-box;
     border: 1px solid #ccc;
     border-radius: 4px;
-    font-size: 15px;
+    font-size: 14px;
     color: rgba(0,0,0,0.5);
   }
   .input:focus{

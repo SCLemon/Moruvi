@@ -213,7 +213,8 @@ export default {
         color: white;
     }
     .user-overview{
-        margin-top:10px;
+        margin-top: 15px;
+        margin-bottom: 8px;
         width: 100%;
         display: flex;
         justify-content: space-evenly;
@@ -258,7 +259,7 @@ export default {
     }
     .router-view{
         width: 100%;
-        height: calc(100vh - 400.5px);
+        height: calc(100vh - 413.5px);
         box-sizing: border-box;
         overflow-y: scroll;
     }

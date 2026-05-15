@@ -77,8 +77,8 @@ export default {
     }
     .paragraph{
         text-align: justify;
-        line-height: 1.3;
+        line-height: 1.5;
         margin-bottom: 15px;
-        font-size: 13px;
+        font-size: 12px;
     }
 </style>
