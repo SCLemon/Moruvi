@@ -36,7 +36,7 @@ router.get('/api/homeSetting/getData', authMiddleware, async (req, res) => {
             roomName: room.roomName,
             locked: room.locked,
             memory: {
-                usage: usage / 1024 / 1024, // MB
+                usage: (usage / 1024 / 1024).toFixed(2), // MB
                 limit: room.database.limit.memory / 1024
             }
         }
