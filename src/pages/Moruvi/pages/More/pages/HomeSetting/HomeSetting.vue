@@ -10,7 +10,7 @@
                 <el-radio-button :label="true">鎖定房間</el-radio-button>
             </el-radio-group>
         </div>
-        <div class="form-item">
+        <div class="form-item form-item-memory-wrapper">
             <div class="form-input-title">用量：</div>
             <div class="form-memory"> {{form.memory.usage}} MB / {{ form.memory.limit }} MB</div>
         </div>
@@ -135,6 +135,10 @@ export default {
   }
   .input::placeholder{
     font-size: 14px;
+  }
+  .form-item-memory-wrapper{
+    margin-top: 30px;
+    margin-bottom: 30px;
   }
   .form-memory{
     color: rgba(210,210,210);
