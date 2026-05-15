@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import { registerServiceWorker, generateFingerprint } from './service-worker/main'
+import { registerServiceWorker } from './service-worker/main'
 import jsCookie from 'js-cookie'
 import axios from 'axios'
 export default {
@@ -34,13 +34,6 @@ export default {
         this.$bus.$emit('handleAlert',title,'已複製到剪貼簿','success');
       })
       .catch(() => {});
-    },
-
-    async generateFingerprint() {
-
-      const hashHex = await generateFingerprint();
-      localStorage.setItem('deviceFingerprint', hashHex);
-
     },
   }
 }
