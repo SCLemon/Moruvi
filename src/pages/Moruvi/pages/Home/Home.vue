@@ -87,8 +87,8 @@ export default {
       }
     },
     async mounted(){
-      await this.getData();
-      await this.getRoomInfo();
+      this.getData();
+      this.getRoomInfo();
     },
     methods: {
       // 通用操作

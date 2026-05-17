@@ -14,7 +14,7 @@
                 <div class="route-icon"><i class="el-icon-reading"></i></div>
                 <div class="route-name">回憶錄</div>
             </div>
-            <div :class="{route:true, 'moruvi-route-selected':$route.path.includes('/moruvi/notification')}">
+            <div :class="{route:true, 'moruvi-route-selected':$route.path.includes('/moruvi/notification')}" @click="goTo('/moruvi/notification')">
                 <div class="route-icon"><i class="el-icon-bell"></i></div>
                 <div class="route-name">動態通知</div>
             </div>

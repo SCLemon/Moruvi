@@ -16,6 +16,10 @@ import HomeSetting from '@/pages/Moruvi/pages/More/pages/HomeSetting/HomeSetting
 import PrivateSetting from '@/pages/Moruvi/pages/More/pages/PrivateSetting/PrivateSetting.vue'
 import ProgramInfo from '@/pages/Moruvi/pages/More/pages/ProgramInfo/ProgramInfo.vue'
 
+import Notification from '@/pages/Moruvi/pages/Notification/Notification.vue'
+import List from '@/pages/Moruvi/pages/Notification/pages/List/List.vue'
+import Detail from '@/pages/Moruvi/pages/Notification/pages/Detail/Detail.vue'
+
 Vue.use(VueRouter)
 const router = new VueRouter({
     routes:[
@@ -63,6 +67,20 @@ const router = new VueRouter({
                             path:'/',
                             redirect:'my-info'
                         },
+                    ]
+                },
+                {
+                    path:'notification',
+                    component: Notification,
+                    children:[
+                        {
+                            path:'',
+                            component: List,
+                        },
+                        {
+                            path:'detail/:idx',
+                            component: Detail,
+                        }
                     ]
                 },
                 {
