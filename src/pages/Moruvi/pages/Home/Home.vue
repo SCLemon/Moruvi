@@ -176,6 +176,7 @@ export default {
           case 'message':
             // 傳送訊息
             if(this.roomInfo.owners.length < 2) return;
+            this.goTo('/moruvi/sendMessage');
             break;
           case 'breakup':
             // 解除關係

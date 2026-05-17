@@ -114,5 +114,6 @@ export default {
         margin-top: 25px;
         font-size: 14px;
         text-align: justify;
+        line-height: 1.5;
     }
 </style>

@@ -19,6 +19,7 @@ import ProgramInfo from '@/pages/Moruvi/pages/More/pages/ProgramInfo/ProgramInfo
 import Notification from '@/pages/Moruvi/pages/Notification/Notification.vue'
 import List from '@/pages/Moruvi/pages/Notification/pages/List/List.vue'
 import Detail from '@/pages/Moruvi/pages/Notification/pages/Detail/Detail.vue'
+import SendMessage from '@/pages/Moruvi/pages/SendMessage/SendMessage.vue'
 
 Vue.use(VueRouter)
 const router = new VueRouter({
@@ -42,6 +43,10 @@ const router = new VueRouter({
                 {
                     path:'home-modifier',
                     component: HomeModifier,
+                },
+                {
+                    path:'sendMessage',
+                    component: SendMessage,
                 },
                 {
                     path:'more',

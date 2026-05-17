@@ -8,7 +8,7 @@
                     <div class="list-title">{{ item.title }}</div>
                     <div class="list-date">{{ item.createTime }}</div>
                 </div>
-                <div class="list-subTitle">{{ item.content }}</div>
+                <div class="list-subTitle">{{ item.subTitle }}</div>
             </div>
             <div class="list-arrow-wrapper">
                 <i class="fa-solid fa-chevron-right"></i>

@@ -38,7 +38,7 @@ router.get('/api/notify/getData',authMiddleware, async (req, res) => {
             const now = new Date();
             const isToday = itemDate.toDateString() === now.toDateString();
             
-            const { author, ...rest } = item._doc;
+            const { author, content, ...rest } = item._doc;
 
             return {
                 ...rest,
@@ -181,7 +181,7 @@ router.get('/api/notify/poke',authMiddleware, async (req, res) => {
             await pushNotification('您的伴侶剛才戳了你一下！', '有人偷偷想你了 💌', undefined, pSubscription.subscription);
         }
 
-        const record = await recordNotification(token, '您的伴侶剛才戳了你一下！', '有人偷偷想你了 💌', partnerToken);
+        const record = await recordNotification(token, '您的伴侶剛才戳了你一下！', '有人偷偷想你了 💌' ,`您的伴侶於 ${format(new Date(), 'yyyy.MM.dd HH:mm:ss')} 戳了您一下，TA 可能正在等待您的回覆，請記得抽空陪伴您的伴侶 💛`, partnerToken);
         
         return res.send(record);
 
@@ -208,7 +208,7 @@ router.post('/api/notify/sendMessage',authMiddleware, async (req, res) => {
         if(!room){
             return res.send({
                 type:'error',
-                message:'傳送通知失敗（房間不存在）。'
+                message:'傳送訊息失敗（房間不存在）。'
             });
         }
 
@@ -220,7 +220,7 @@ router.post('/api/notify/sendMessage',authMiddleware, async (req, res) => {
             await pushNotification('您的伴侶剛才傳送了一封訊息！', '開啟通知閱讀完整內容。', undefined, pSubscription.subscription);
         }
 
-        const record = await recordNotification(token, title, content, partnerToken);
+        const record = await recordNotification(token, '信件：' + title, '開啟通知閱讀完整內容。', content, partnerToken);
         
         return res.send(record);
 
@@ -233,15 +233,15 @@ router.post('/api/notify/sendMessage',authMiddleware, async (req, res) => {
     }
 });
 
-async function recordNotification(from, title, content, to){
-    console.log('紀錄通知：', {from, title, content, to})
+async function recordNotification(from, title, subTitle, content, to){
     try{
         const target = await notificationModel.findOne({token: to});
     
         const record = {
             createTime: format(new Date(), 'yyyy.MM.dd HH:mm:ss'),
             idx: uuid(),
-            title, 
+            title,
+            subTitle,
             content,
             author: from
         }

@@ -213,7 +213,6 @@ export default {
         color: white;
         border: none;
         border-radius: 4px;
-        padding: 10px 20px;
         font-size: 16px;
         cursor: pointer;
         height: 40px;
@@ -225,7 +224,6 @@ export default {
         background: 0;
         border: 1px solid rgba(210,210,210,0.8);
         border-radius: 4px;
-        padding: 10px 20px;
         font-size: 16px;
         cursor: pointer;
         height: 40px;
