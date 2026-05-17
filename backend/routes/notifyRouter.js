@@ -84,7 +84,6 @@ router.get(`/api/notify/getSpecificData/:idx`,authMiddleware, async (req, res) =
 
         const output = {
             title: record.title,
-            subTitle: record.subTitle,
             content: record.content,
             createTime: record.createTime,
             author: {
@@ -178,18 +177,11 @@ router.get('/api/notify/poke',authMiddleware, async (req, res) => {
 
         const pSubscription = await subscribeModel.findOne({token: partnerToken})
 
-        if(!pSubscription){
-            return res.send({
-                type:'error',
-                message:'傳送通知失敗（對方尚未開啟訂閱）。'
-            });
+        if(pSubscription){
+            await pushNotification('您的伴侶剛才戳了你一下！', '有人偷偷想你了 💌', undefined, pSubscription.subscription);
         }
 
-        const result = await pushNotification('您的伴侶剛才戳了你一下！', '有人偷偷想你了 💌', undefined, pSubscription.subscription);
-
-        if(result.type == 'error') return res.send(result);
-
-        const record = await recordNotification(token, '您的伴侶剛才戳了你一下！', '有人偷偷想你了 💌', '有人偷偷想你了 💌', partnerToken);
+        const record = await recordNotification(token, '您的伴侶剛才戳了你一下！', '有人偷偷想你了 💌', partnerToken);
         
         return res.send(record);
 
@@ -202,8 +194,47 @@ router.get('/api/notify/poke',authMiddleware, async (req, res) => {
     }
 });
 
+// 傳送訊息
+router.post('/api/notify/sendMessage',authMiddleware, async (req, res) => {
+    
+    const { title, content } = req.body;
 
-async function recordNotification(from, title, subTitle, content, to){
+    const token = req.headers['x-user-token']
+    
+    try {
+       
+        const room = await roomModel.findOne({ owners: token });
+
+        if(!room){
+            return res.send({
+                type:'error',
+                message:'傳送通知失敗（房間不存在）。'
+            });
+        }
+
+        const partnerToken = room.owners.find(t => t !== token);
+
+        const pSubscription = await subscribeModel.findOne({token: partnerToken})
+
+        if(pSubscription){
+            await pushNotification('您的伴侶剛才傳送了一封訊息！', '開啟通知閱讀完整內容。', undefined, pSubscription.subscription);
+        }
+
+        const record = await recordNotification(token, title, content, partnerToken);
+        
+        return res.send(record);
+
+    } catch (e) {
+        console.log(e);
+        return res.send({
+            type: 'error',
+            message: '伺服器錯誤，請洽客服人員協助。',
+        });
+    }
+});
+
+async function recordNotification(from, title, content, to){
+    console.log('紀錄通知：', {from, title, content, to})
     try{
         const target = await notificationModel.findOne({token: to});
     
@@ -211,7 +242,6 @@ async function recordNotification(from, title, subTitle, content, to){
             createTime: format(new Date(), 'yyyy.MM.dd HH:mm:ss'),
             idx: uuid(),
             title, 
-            subTitle, 
             content,
             author: from
         }
