@@ -22,7 +22,7 @@
               <div :class="{'first-content-partner-options-item': true, 'first-content-partner-options-item-disabled': roomInfo.owners[1]}" @click.stop="handlePartnerOption('invite')"><i class="fa-solid fa-plus first-content-partner-options-item-icon"></i> 發出邀請</div>
               <div :class="{'first-content-partner-options-item': true, 'first-content-partner-options-item-disabled': !roomInfo.owners[1]}" @click.stop="handlePartnerOption('poke')"><i class="fa-solid fa-hand-point-left first-content-partner-options-item-icon"></i> 戳戳對方</div>
               <div :class="{'first-content-partner-options-item': true, 'first-content-partner-options-item-disabled': !roomInfo.owners[1]}" @click.stop="handlePartnerOption('message')"><i class="fa-solid fa-envelope first-content-partner-options-item-icon"></i> 傳送訊息</div>
-              <div :class="{'first-content-partner-options-item': true, 'first-content-partner-options-item-disabled': !roomInfo.owners[1]}" @click.stop="handlePartnerOption('disconnect')"><i class="fa-solid fa-trash first-content-partner-options-item-icon" style="margin-right: 7px;"></i> 解除關係</div>
+              <div :class="{'first-content-partner-options-item': true, 'first-content-partner-options-item-disabled': true}" style="text-decoration: line-through;" @click.stop="handlePartnerOption('breakup')"><i class="fa-solid fa-heart-crack first-content-partner-options-item-icon" style="margin-right: 7px;"></i> 解除關係</div>
             </div>
           </div>
         </div>
@@ -180,6 +180,8 @@ export default {
           case 'breakup':
             // 解除關係
             if(this.roomInfo.owners.length < 2) return;
+            this.$bus.$emit('handleAlert','系統通知','💘 系統偵測到您可能正在情緒化操作。為保障感情安全，解除關係功能暫時關閉。請稍後再試。','error');
+            this.showPartnerOptions = false;
             break;
         }
       },
