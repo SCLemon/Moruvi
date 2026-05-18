@@ -253,8 +253,8 @@ async function recordNotification(from, title, subTitle, content, to){
             })
         }
         else {
-            // 只保留最近的 100 筆記錄
-            if(target.list.length >= 100){
+            // 只保留最近的 250 筆記錄
+            if(target.list.length >= 250){
                 target.list.shift();
             }
             target.list.push(record);
