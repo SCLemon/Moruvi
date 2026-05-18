@@ -7,7 +7,7 @@ const router = express.Router();
 const roomModel = require('../models/roomModel');
 
 const {format} = require('date-fns');
-const { uuid } = require('uuidv4');
+const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
 const authMiddleware = require('../middleware/auth.middleware');
 const subscribeModel = require('../models/subscribeModel');
@@ -239,7 +239,7 @@ async function recordNotification(from, title, subTitle, content, to){
     
         const record = {
             createTime: format(new Date(), 'yyyy.MM.dd HH:mm:ss'),
-            idx: uuid(),
+            idx: uuidv4(),
             title,
             subTitle,
             content,
