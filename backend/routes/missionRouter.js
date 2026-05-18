@@ -92,7 +92,7 @@ router.get('/api/mission/getMissionList', authMiddleware, async (req, res) => {
     
         if(!mission){
             return res.send({
-                type:'error',
+                type:'success',
                 message:'用戶資料獲取成功。',
                 data: []
             });

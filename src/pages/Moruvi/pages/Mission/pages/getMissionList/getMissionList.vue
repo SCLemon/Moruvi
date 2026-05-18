@@ -1,17 +1,22 @@
 <template>
   <div class="list-wrapper">
-    <div class="list" v-for="(item, id) in list" :key="id" @click="goTo(`/moruvi/mission-modifier/${item.itemId}?from=get-mission-list`)">
-        <div class="list-content-wrapper">
-            <div class="list-content">{{item.title}}</div>
-            <div class="list-money">{{item.money}} 金幣</div>
+    <template v-if="list.length">
+        <div class="list" v-for="(item, id) in list" :key="id" @click="goTo(`/moruvi/mission-modifier/${item.itemId}?from=get-mission-list`)">
+            <div class="list-content-wrapper">
+                <div class="list-content">{{item.title}}</div>
+                <div class="list-money">{{item.money}} 金幣</div>
+            </div>
+            <div class="list-button-wrapper">
+                <template v-if="item.status == '已批准'">
+                        <div class="list-button list-button-get" @click="completeMission(item.itemId)">完成</div>
+                        <div class="list-button list-button-deny" @click="cancelMission(item.itemId)">取消</div>
+                </template>
+                <div v-else class="list-status">{{ item.status }}</div>
+            </div>
         </div>
-        <div class="list-button-wrapper">
-           <template v-if="item.status == '已批准'">
-                <div class="list-button list-button-get" @click="completeMission(item.itemId)">完成</div>
-                <div class="list-button list-button-deny" @click="cancelMission(item.itemId)">取消</div>
-           </template>
-           <div v-else class="list-status">{{ item.status }}</div>
-        </div>
+    </template>
+    <div v-else>
+        <el-empty description="尚未接取任務"></el-empty>
     </div>
   </div>
 </template>
