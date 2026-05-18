@@ -7,11 +7,14 @@ const router = express.Router();
 const userModel = require('../models/userModel');
 const prizeModel = require('../models/prizeModel');
 const roomModel = require('../models/roomModel');
+const subscribeModel = require('../models/subscribeModel')
 
 const { v4: uuidv4 } = require('uuid');
 const { format } = require('date-fns');
 
 const authMiddleware = require('../middleware/auth.middleware');
+const { recordNotification } = require('./notifyRouter');
+const { pushNotification } = require('./service-worker/serviceWorker');
 
 // 獲取用戶資訊
 router.get('/api/prize/getUserInfo', authMiddleware, async (req, res) => {
@@ -158,9 +161,47 @@ router.get('/api/prize/getSpecificPrize/:itemId', authMiddleware, async (req, re
 
     try {
 
-        const myPrize = await prizeModel.findOne({ token: req.headers['x-user-token'] });
+        const user = await userModel.findOne({token: req.headers['x-user-token']});
+    
+        if(!user){
+            return res.send({
+                type:'error',
+                message:'用戶資料獲取失敗（查無此用戶）。',
+                data: []
+            });
+        }
 
-        const targetPrize = myPrize.exchangePrize.find(p => p.itemId === itemId);
+        const roomId = user.roomId;
+
+        const room = await roomModel.findOne({ roomId });
+
+        if(!room){
+            return res.send({
+                type:'error',
+                message:'用戶資料獲取失敗（查無此房間）。',
+                data: []
+            });
+        }
+
+        const partnerToken = room.owners.find(owner => owner !== user.token);
+
+        const [partnerPostPrizeList, myPostPrizeList, myExchangePrizeList] = await Promise.all([
+            prizeModel.findOne({ token: partnerToken })
+                .then(m => m?.postPrize ?? []),
+
+            prizeModel.findOne({ token: user.token })
+                .then(m => m?.postPrize ?? []),
+
+            prizeModel.findOne({ token: user.token })
+                .then(m => m?.exchangePrize ?? []) 
+        ]);
+
+         const mergedList = [
+            ...partnerPostPrizeList,
+            ...myPostPrizeList,
+            ...myExchangePrizeList
+        ]
+        const targetPrize = mergedList.find(p => p.itemId === itemId);
 
         if(!targetPrize){
             return res.send({
@@ -338,7 +379,6 @@ router.post('/api/prize/purchase', authMiddleware, async (req, res) => {
             ...myPostPrizeList
         ]
         const targetPrize = mergedList.find(p => p.itemId === itemId);
-
         if(!targetPrize){
             return res.send({
                 type:'error',
@@ -375,9 +415,11 @@ router.post('/api/prize/purchase', authMiddleware, async (req, res) => {
 
         await myPrizeDoc.save();
 
+        await notifyPrize(req, '商品購買通知', '開啟通知查看商品內容' ,`您的伴侶購買了名稱為「 ${targetPrize.title}」的商品，請等待對方確認兌換。`,);
+
         return res.send({
             type:'success',
-            message:'任務處理成功。',
+            message:'商品購買成功。',
         });
 
     } catch (e) {
@@ -424,6 +466,8 @@ router.get('/api/prize/completePrize/:itemId', authMiddleware, async (req, res) 
         targetPrize.status = true; // 已兌換
 
         await prize.save();
+
+        await notifyPrize(req, '商品兌換通知', '開啟通知查看商品內容', `您的伴侶已確認兌換名稱為「${targetPrize.title}」的商品，請履行交付義務。`);
 
         return res.send({
             type:'success',
@@ -479,6 +523,8 @@ router.get('/api/prize/cancelPrize/:itemId', authMiddleware, async (req, res) =>
 
         await prize.save();
 
+        await notifyPrize(req, '商品退款通知', '開啟通知查看商品內容', `您的伴侶取消了商品名稱為「${targetPrize.title}」的購買。`);
+
         return res.send({
             type:'success',
             message:'商品退款成功。',
@@ -492,5 +538,43 @@ router.get('/api/prize/cancelPrize/:itemId', authMiddleware, async (req, res) =>
         });
     }
 });
+
+async function notifyPrize(req, title, subTitle, content) {
+    try{
+        const user = await userModel.findOne({token: req.headers['x-user-token']});
+    
+        if(!user){
+            return {
+                type:'error',
+                message:'用戶資料獲取失敗（查無此用戶）。',
+            };
+        }
+
+        const roomId = user.roomId;
+
+        const room = await roomModel.findOne({ roomId });
+
+        if(!room){
+            return {
+                type:'error',
+                message:'用戶資料獲取失敗（查無此房間）。',
+            };
+        }
+        const partnerToken = room.owners.find(owner => owner !== user.token);
+        
+        const result = await subscribeModel.findOne({ token: partnerToken });
+
+        if(result) pushNotification(title, subTitle, undefined, result.subscription);
+        await recordNotification(user.token, title, subTitle, content, partnerToken);
+
+        return {
+            type:'success',
+            message:'通知發送成功。',
+        };
+    }
+    catch(e){
+        console.log(e);
+    }
+}
 
 module.exports = router;

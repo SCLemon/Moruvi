@@ -63,7 +63,7 @@ app.use(homeSettingRouter);
 const subscribeRouter = require('./routes/subscribeRouter');
 app.use(subscribeRouter);
 
-const notifyRouter = require('./routes/notifyRouter');
+const { router: notifyRouter } = require('./routes/notifyRouter');
 app.use(notifyRouter);
 
 const missionRouter = require('./routes/missionRouter');

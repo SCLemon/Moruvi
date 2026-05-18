@@ -269,4 +269,6 @@ async function recordNotification(from, title, subTitle, content, to){
 }
 
 
-module.exports = router;
+module.exports = {
+    router, recordNotification
+};

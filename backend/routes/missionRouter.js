@@ -7,6 +7,7 @@ const router = express.Router();
 const userModel = require('../models/userModel');
 const roomModel = require('../models/roomModel');
 const missionModel = require('../models/missionModel');
+const subscribeModel = require('../models/subscribeModel');
 
 const { v4: uuidv4 } = require('uuid');
 const { format } = require('date-fns');
@@ -14,6 +15,8 @@ const { format } = require('date-fns');
 const authMiddleware = require('../middleware/auth.middleware');
 const prizeModel = require('../models/prizeModel');
 
+const { recordNotification } = require('./notifyRouter');
+const { pushNotification } = require('./service-worker/serviceWorker');
 
 // 待批准、已批准、已駁回、待撥款、已完成
 
@@ -237,6 +240,8 @@ router.post('/api/mission/postMission', authMiddleware, async (req, res) => {
 
         await mission.save();
 
+        await notifyMission(req, '您的伴侶剛才發布了一個任務！', '開啟通知查看任務內容。', `您的伴侶於 ${format(new Date(), 'yyyy.MM.dd HH:mm:ss')} 發布了一個任務，任務標題為「${title}」。`);
+
         return res.send({
             type:'success',
             message:'任務發布成功。',
@@ -378,6 +383,8 @@ router.post('/api/mission/handleMission', authMiddleware, async (req, res) => {
 
         await myMission.save();
 
+        await notifyMission(req, `您的伴侶剛才${action === 'approve' ? '批准了' : '駁回了'}您的任務！`, '開啟通知查看任務內容。', `您的伴侶於 ${format(new Date(), 'yyyy.MM.dd HH:mm:ss')} ${action === 'approve' ? '批准了' : '駁回了'}您的任務，任務標題為「${targetMission.title}」。`);
+
         return res.send({
             type:'success',
             message:'任務處理成功。',
@@ -440,6 +447,8 @@ router.get('/api/mission/completeMission/:itemId', authMiddleware, async (req, r
             }
         }
 
+        await notifyMission(req, '您的伴侶剛才完成了一個任務！', '開啟通知查看任務內容。', `您的伴侶於 ${format(new Date(), 'yyyy.MM.dd HH:mm:ss')} 完成了一個任務，任務標題為「${targetMission.title}」。`);
+
         return res.send({
             type:'success',
             message:'任務完成狀態更新成功。',
@@ -501,6 +510,8 @@ router.get('/api/mission/cancelMission/:itemId', authMiddleware, async (req, res
                 await publisherMission.save();
             }
         }
+
+        await notifyMission(req, '您的伴侶剛才取消了一個任務！', '開啟通知查看任務內容。', `您的伴侶於 ${format(new Date(), 'yyyy.MM.dd HH:mm:ss')} 取消了一個任務，任務標題為「${targetMission.title}」。`);
 
         return res.send({
             type:'success',
@@ -588,6 +599,8 @@ router.get('/api/mission/allocateMoney/:itemId', authMiddleware, async (req, res
             }
         }
 
+        await notifyMission(req, '您的伴侶剛才撥款了一個任務！', '開啟通知查看任務內容。', `您的伴侶於 ${format(new Date(), 'yyyy.MM.dd HH:mm:ss')} 撥款了一個任務，任務標題為「${targetMission.title}」。`);
+
         return res.send({
             type:'success',
             message:'任務撥款狀態更新成功。',
@@ -601,4 +614,42 @@ router.get('/api/mission/allocateMoney/:itemId', authMiddleware, async (req, res
         });
     }
 });
+
+async function notifyMission(req, title, subTitle, content) {
+    try{
+        const user = await userModel.findOne({token: req.headers['x-user-token']});
+    
+        if(!user){
+            return {
+                type:'error',
+                message:'用戶資料獲取失敗（查無此用戶）。',
+            };
+        }
+
+        const roomId = user.roomId;
+
+        const room = await roomModel.findOne({ roomId });
+
+        if(!room){
+            return {
+                type:'error',
+                message:'用戶資料獲取失敗（查無此房間）。',
+            };
+        }
+        const partnerToken = room.owners.find(owner => owner !== user.token);
+        
+        const result = await subscribeModel.findOne({ token: partnerToken });
+
+        if(result) pushNotification(title, subTitle, undefined, result.subscription);
+        await recordNotification(user.token, title, subTitle, content, partnerToken);
+
+        return {
+            type:'success',
+            message:'通知發送成功。',
+        };
+    }
+    catch(e){
+        console.log(e);
+    }
+}
 module.exports = router;
