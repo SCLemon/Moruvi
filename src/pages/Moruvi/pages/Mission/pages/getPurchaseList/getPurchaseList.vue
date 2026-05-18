@@ -1,22 +1,22 @@
 <template>
   <div class="list-wrapper">
     <template v-if="list.length">
-        <div class="list" v-for="(item, id) in list" :key="id" @click="goTo(`/moruvi/mission-modifier/${item.itemId}?from=get-mission-list`)">
+        <div class="list" v-for="(item, id) in list" :key="id" @click="goTo(`/moruvi/prize-modifier/${item.itemId}?from=get-purchase-list`)">
             <div class="list-content-wrapper">
                 <div class="list-content">{{item.title}}</div>
                 <div class="list-money">{{item.money}} 金幣</div>
             </div>
             <div class="list-button-wrapper">
-                <template v-if="item.status == '已批准'">
-                        <div class="list-button list-button-get" @click.stop="completeMission(item.itemId)">完成</div>
-                        <div class="list-button list-button-deny" @click.stop="cancelMission(item.itemId)">取消</div>
+                <template v-if="!item.status">
+                        <div class="list-button list-button-get" @click.stop="completePrize(item.itemId)">兌換</div>
+                        <div class="list-button list-button-deny" @click.stop="cancelPrize(item.itemId)">退款</div>
                 </template>
-                <div v-else class="list-status">{{ item.status }}</div>
+                <div v-else class="list-status">已兌換</div>
             </div>
         </div>
     </template>
     <div v-else>
-        <el-empty description="尚未接取任務"></el-empty>
+        <el-empty description="尚未購買商品"></el-empty>
     </div>
   </div>
 </template>
@@ -25,7 +25,7 @@
 import axios from 'axios';
 import jsCookie from 'js-cookie';
 export default {
-    name: 'GetMissionList',
+    name: 'GetPrizeList',
     data(){
         return {
             list:[]
@@ -40,9 +40,9 @@ export default {
         },
         async getData(){
             try{
-                const res = await axios.get('/api/mission/getMissionList',{
+                const res = await axios.get('/api/prize/getPurchasedList',{
                     headers:{
-                    'x-user-token': jsCookie.get('authToken')
+                        'x-user-token': jsCookie.get('authToken')
                     }
                 });
                 if(res.data.type == 'error'){
@@ -53,9 +53,9 @@ export default {
                 }
             }catch(e){}  
         },
-        async completeMission(itemId){
+        async completePrize(itemId){
             try{
-                const res = await axios.get(`/api/mission/completeMission/${itemId}`,{
+                const res = await axios.get(`/api/prize/completePrize/${itemId}`,{
                     headers:{
                         'x-user-token': jsCookie.get('authToken')
                     }
@@ -67,15 +67,16 @@ export default {
             }
             catch(e){}   
         },
-        async cancelMission(itemId){
+        async cancelPrize(itemId){
             try{
-                const res = await axios.get(`/api/mission/cancelMission/${itemId}`,{
+                const res = await axios.get(`/api/prize/cancelPrize/${itemId}`,{
                     headers:{
                         'x-user-token': jsCookie.get('authToken')
                     }
                 });
                 if(res.data.type == 'success'){
                    await this.getData();
+                   this.$bus.$emit('refreshUserMoney');
                 }
                 this.$bus.$emit('handleAlert','系統訊息', res.data.message,res.data.type);
             }

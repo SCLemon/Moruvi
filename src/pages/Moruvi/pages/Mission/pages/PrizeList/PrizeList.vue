@@ -1,22 +1,20 @@
 <template>
   <div class="list-wrapper">
+    <div class="list-add-mission" @click="goTo('/moruvi/prize-modifier?from=prize-list')">新增商品</div>
     <template v-if="list.length">
-        <div class="list" v-for="(item, id) in list" :key="id" @click="goTo(`/moruvi/mission-modifier/${item.itemId}?from=get-mission-list`)">
+        <div class="list" v-for="(item, id) in list" :key="id" @click="goTo(`/moruvi/prize-modifier/${item.itemId}?from=prize-list`)">
             <div class="list-content-wrapper">
                 <div class="list-content">{{item.title}}</div>
                 <div class="list-money">{{item.money}} 金幣</div>
             </div>
             <div class="list-button-wrapper">
-                <template v-if="item.status == '已批准'">
-                        <div class="list-button list-button-get" @click.stop="completeMission(item.itemId)">完成</div>
-                        <div class="list-button list-button-deny" @click.stop="cancelMission(item.itemId)">取消</div>
-                </template>
-                <div v-else class="list-status">{{ item.status }}</div>
+                <div v-if="!item.isMine" class="list-button list-button-get" @click.stop="purchase(item.itemId)">兌換</div>
+                <div v-else class="list-button list-button-deny" @click.stop="remove(item.itemId)">撤銷</div>
             </div>
         </div>
     </template>
     <div v-else>
-        <el-empty description="尚未接取任務"></el-empty>
+        <el-empty description="尚無商品列表"></el-empty>
     </div>
   </div>
 </template>
@@ -25,7 +23,7 @@
 import axios from 'axios';
 import jsCookie from 'js-cookie';
 export default {
-    name: 'GetMissionList',
+    name: 'PrizeList',
     data(){
         return {
             list:[]
@@ -40,7 +38,7 @@ export default {
         },
         async getData(){
             try{
-                const res = await axios.get('/api/mission/getMissionList',{
+                const res = await axios.get('/api/prize/getPrizeList',{
                     headers:{
                     'x-user-token': jsCookie.get('authToken')
                     }
@@ -53,9 +51,9 @@ export default {
                 }
             }catch(e){}  
         },
-        async completeMission(itemId){
+        async remove(itemId){
             try{
-                const res = await axios.get(`/api/mission/completeMission/${itemId}`,{
+                const res = await axios.delete(`/api/prize/removePrize/${itemId}`,{
                     headers:{
                         'x-user-token': jsCookie.get('authToken')
                     }
@@ -64,18 +62,21 @@ export default {
                    await this.getData();
                 }
                 this.$bus.$emit('handleAlert','系統訊息', res.data.message,res.data.type);
-            }
-            catch(e){}   
+            }catch(e){}  
         },
-        async cancelMission(itemId){
+        async purchase(itemId){
             try{
-                const res = await axios.get(`/api/mission/cancelMission/${itemId}`,{
+                const res = await axios.post('/api/prize/purchase',{
+                    itemId
+                },{
                     headers:{
-                        'x-user-token': jsCookie.get('authToken')
+                    'x-user-token': jsCookie.get('authToken')
                     }
                 });
                 if(res.data.type == 'success'){
                    await this.getData();
+                   this.$bus.$emit('refreshUserMoney');
+                   this.goTo('/moruvi/mission/get-purchase-list')
                 }
                 this.$bus.$emit('handleAlert','系統訊息', res.data.message,res.data.type);
             }
@@ -90,8 +91,23 @@ export default {
         width: 100%;
         padding-left: 3px;
         padding-right: 3px;
-        padding-top: 10px;
         box-sizing: border-box;
+    }
+    .list-add-mission{
+        padding: 5px 10px 5px 10px;
+        width: 90px;
+        height: 40px;
+        border-radius: 5px;
+        margin-left: auto;
+        margin-bottom: 20px;
+        font-size: 14px;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-sizing: border-box;
+        background: pink;
+
     }
     .list{
         width: 100%;
@@ -146,10 +162,12 @@ export default {
     .list-button-get{
         background: pink;
         color: white;
-        margin-right: 10px;
     }
     .list-button-deny{
         border: 0.1px solid rgba(0,0,0,0.2);
+    }
+    .list-button-allocate{
+        margin-right: 0;
     }
     .list-status{
         color: rgba(210,210,210);

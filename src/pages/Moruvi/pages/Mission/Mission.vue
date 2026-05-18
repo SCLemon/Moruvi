@@ -13,8 +13,8 @@
     <div class="options-wrapper">
       <div :class="{option: true, 'option-selected': $route.path.includes('/moruvi/mission/mission-list') }" @click="goTo('/moruvi/mission/mission-list')">任務接取</div>
       <div :class="{option: true, 'option-selected': $route.path.includes('/moruvi/mission/get-mission-list')}" @click="goTo('/moruvi/mission/get-mission-list')">我的任務</div>
-      <div :class="{option: true, 'option-selected': $route.path.includes('/my-info')}">兌換獎勵</div>
-      <div :class="{option: true, 'option-selected': $route.path.includes('/my-info')}">我的背包</div>
+      <div :class="{option: true, 'option-selected': $route.path.includes('/moruvi/mission/prize-list')}" @click="goTo('/moruvi/mission/prize-list')">兌換獎勵</div>
+      <div :class="{option: true, 'option-selected': $route.path.includes('/moruvi/mission/get-purchase-list')}" @click="goTo('/moruvi/mission/get-purchase-list')">我的背包</div>
     </div>
     <router-view class="router-view"></router-view>
   </div>
@@ -36,6 +36,7 @@ export default {
     },
     async mounted(){
       await this.getData();
+      this.$bus.$on('refreshUserMoney', this.getData)
     },
     methods:{
       goTo(path) {
@@ -43,7 +44,7 @@ export default {
       },
       async getData(){
         try{
-          const res = await axios.get('/api/prize/getData',{
+          const res = await axios.get('/api/prize/getUserInfo',{
             headers:{
               'x-user-token': jsCookie.get('authToken')
             }

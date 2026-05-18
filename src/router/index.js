@@ -26,6 +26,10 @@ import MissionList from '@/pages/Moruvi/pages/Mission/pages/MissonList/MissionLi
 import GetMissionList from '@/pages/Moruvi/pages/Mission/pages/getMissionList/getMissionList.vue'
 import MissionModifier from '@/pages/Moruvi/pages/MissionModifier/MissionModifier.vue'
 
+import PrizeList from '@/pages/Moruvi/pages/Mission/pages/PrizeList/PrizeList.vue'
+import PrizeModifier from '@/pages/Moruvi/pages/PrizeModifier/PrizeModifier.vue'
+import GetPurchaseList from '@/pages/Moruvi/pages/Mission/pages/getPurchaseList/getPurchaseList.vue'
+
 Vue.use(VueRouter)
 const router = new VueRouter({
     routes:[
@@ -66,6 +70,14 @@ const router = new VueRouter({
                             component: GetMissionList,
                         },
                         {
+                            path:'prize-list',
+                            component: PrizeList,
+                        },
+                        {
+                            path:'get-purchase-list',
+                            component: GetPurchaseList,
+                        },
+                        {
                             path:'/',
                             redirect:'mission-list'
                         }
@@ -74,6 +86,10 @@ const router = new VueRouter({
                 {
                     path:'mission-modifier/:itemId?',
                     component: MissionModifier,
+                },
+                {
+                    path:'prize-modifier/:itemId?',
+                    component: PrizeModifier,
                 },
                 {
                     path:'more',
