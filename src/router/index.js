@@ -24,6 +24,7 @@ import SendMessage from '@/pages/Moruvi/pages/SendMessage/SendMessage.vue'
 import Mission from '@/pages/Moruvi/pages/Mission/Mission.vue'
 import MissionList from '@/pages/Moruvi/pages/Mission/pages/MissonList/MissionList.vue'
 import GetMissionList from '@/pages/Moruvi/pages/Mission/pages/getMissionList/getMissionList.vue'
+import MissionModifier from '@/pages/Moruvi/pages/MissionModifier/MissionModifier.vue'
 
 Vue.use(VueRouter)
 const router = new VueRouter({
@@ -69,6 +70,10 @@ const router = new VueRouter({
                             redirect:'mission-list'
                         }
                     ]
+                },
+                {
+                    path:'mission-modifier/:itemId?',
+                    component: MissionModifier,
                 },
                 {
                     path:'more',

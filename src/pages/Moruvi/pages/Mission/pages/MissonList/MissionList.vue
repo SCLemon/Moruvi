@@ -1,7 +1,7 @@
 <template>
   <div class="list-wrapper">
-    <div class="list-add-mission" @click="postMission()">張貼任務</div>
-    <div class="list" v-for="(item, id) in list" :key="id">
+    <div class="list-add-mission" @click="goTo('/moruvi/mission-modifier?from=mission-list')">張貼任務</div>
+    <div class="list" v-for="(item, id) in list" :key="id" @click="goTo(`/moruvi/mission-modifier/${item.itemId}?from=mission-list`)">
         <div class="list-content-wrapper">
             <div class="list-content">{{item.title}}</div>
             <div class="list-money">{{item.money}} 金幣</div>
@@ -9,12 +9,12 @@
         <div class="list-button-wrapper">
            <template v-if="item.status == '待批准'">
                 <template v-if="!item.isMine">
-                    <div class="list-button list-button-get" @click="handleMission(item.itemId,'approve')">批准</div>
-                    <div class="list-button list-button-deny" @click="handleMission(item.itemId,'reject')">拒絕</div>
+                    <div class="list-button list-button-get" @click.stop="handleMission(item.itemId,'approve')">批准</div>
+                    <div class="list-button list-button-deny" @click.stop="handleMission(item.itemId,'reject')">拒絕</div>
                 </template>
-                <div v-else class="list-button list-button-deny" @click="removeMission(item.itemId)">撤銷</div>
+                <div v-else class="list-button list-button-deny" @click.stop="removeMission(item.itemId)">撤銷</div>
            </template>
-           <div v-else-if="item.status == '待撥款'" class="list-button list-button-get list-button-allocate" @click="allocateMoney(item.itemId)">撥款</div>
+           <div v-else-if="item.status == '待撥款'" class="list-button list-button-get list-button-allocate" @click.stop="allocateMoney(item.itemId)">撥款</div>
            <div v-else class="list-status">{{ item.status }}</div>
         </div>
     </div>
@@ -35,6 +35,9 @@ export default {
         await this.getData();
     },
     methods:{
+        goTo(path) {
+            this.$router.replace(path).catch((e)=>{});
+        },
         async getData(){
             try{
                 const res = await axios.get('/api/mission/waitToGet',{
@@ -49,24 +52,6 @@ export default {
                     this.list = res.data.data
                 }
             }catch(e){}  
-        },
-        async postMission(){
-            const testData = {
-                title: '完成作業',
-                description: '完成作業',
-                money: 520
-            }
-            try{
-                const res = await axios.post('/api/mission/postMission',testData,{
-                    headers:{
-                    'x-user-token': jsCookie.get('authToken')
-                    }
-                });
-                if(res.data.type == 'success'){
-                   await this.getData();
-                }
-                this.$bus.$emit('handleAlert','系統訊息', res.data.message,res.data.type);
-            }catch(e){}   
         },
         async removeMission(itemId){
             try{

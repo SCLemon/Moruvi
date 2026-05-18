@@ -123,11 +123,89 @@ router.get('/api/mission/getMissionList', authMiddleware, async (req, res) => {
     }
 });
 
+// 獲取特定任務的詳細資料
+router.get('/api/mission/getSpecificMission/:itemId', authMiddleware, async (req, res) => {
+    const { itemId } = req.params;
+
+    try {
+        const user = await userModel.findOne({token: req.headers['x-user-token']});
+    
+        if(!user){
+            return res.send({
+                type:'error',
+                message:'用戶資料獲取失敗（查無此用戶）。',
+                data: {}
+            });
+        }
+
+        const roomId = user.roomId;
+
+        const room = await roomModel.findOne({ roomId });
+
+        if(!room){
+            return res.send({
+                type:'error',
+                message:'用戶資料獲取失敗（查無此房間）。',
+                data: {}
+            });
+        }
+
+        const partnerToken = room.owners.find(owner => owner !== user.token);
+        
+        const partnerMission = await missionModel.findOne({ token: partnerToken });
+
+        const myMission = await missionModel.findOne({ token: user.token });
+
+        const targetMission = partnerMission?.postMission.find(m => m.itemId === itemId) 
+                            || myMission?.postMission.find(m => m.itemId === itemId);
+
+        if(!targetMission){
+            return res.send({
+                type:'error',
+                message:'任務資料獲取失敗（查無此任務）。',
+                data: {}
+            });
+        }
+
+        return res.send({
+                type:'success',
+                message:'任務資料獲取成功。',
+                data: {
+                    money: targetMission.money,
+                    title: targetMission.title,
+                    description: targetMission.description,
+                }
+            });
+
+    } catch (e) {
+        console.log(e)
+        return res.send({
+            type:'error',
+            message:'伺服器錯誤，請洽客服人員協助。',
+        });
+    }
+});
 // 任務發布
 router.post('/api/mission/postMission', authMiddleware, async (req, res) => {
     const { title, description, money } = req.body;
 
     try {
+
+        // 檢查是否為空 且 money 是否為數字
+        if(!title || !description || money == null){
+            return res.send({
+                type:'error',
+                message:'任務發布失敗（資料不可為空）。',
+            });
+        }
+
+        if(isNaN(money)){
+            return res.send({
+                type:'error',
+                message:'任務發布失敗（金額必須為數字）。',
+            });
+        }
+
         const user = await userModel.findOne({token: req.headers['x-user-token']});
     
         if(!user){

@@ -1,6 +1,6 @@
 <template>
   <div class="list-wrapper">
-    <div class="list" v-for="(item, id) in list" :key="id">
+    <div class="list" v-for="(item, id) in list" :key="id" @click="goTo(`/moruvi/mission-modifier/${item.itemId}?from=get-mission-list`)">
         <div class="list-content-wrapper">
             <div class="list-content">{{item.title}}</div>
             <div class="list-money">{{item.money}} 金幣</div>
@@ -30,6 +30,9 @@ export default {
         await this.getData();
     },
     methods:{
+        goTo(path) {
+            this.$router.replace(path).catch((e)=>{});
+        },
         async getData(){
             try{
                 const res = await axios.get('/api/mission/getMissionList',{
