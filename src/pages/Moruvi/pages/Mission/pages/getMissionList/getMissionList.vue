@@ -55,6 +55,12 @@ export default {
         },
         async completeMission(itemId){
             try{
+                await this.$confirm(`確認進行操作（完成任務）？`,'完成任務',{
+                    confirmButtonText:'確認',
+                    cancelButtonText:'取消',
+                    customClass: 'PWACSS_MessageBox',
+                    type:'warning',
+                })
                 const res = await axios.get(`/api/mission/completeMission/${itemId}`,{
                     headers:{
                         'x-user-token': jsCookie.get('authToken')
@@ -69,6 +75,12 @@ export default {
         },
         async cancelMission(itemId){
             try{
+                await this.$confirm(`確認進行操作（取消任務）？`,'取消任務',{
+                    confirmButtonText:'確認',
+                    cancelButtonText:'取消',
+                    customClass: 'PWACSS_MessageBox',
+                    type:'warning',
+                })
                 const res = await axios.get(`/api/mission/cancelMission/${itemId}`,{
                     headers:{
                         'x-user-token': jsCookie.get('authToken')

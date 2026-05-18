@@ -53,6 +53,12 @@ export default {
         },
         async remove(itemId){
             try{
+                await this.$confirm(`確認進行操作（移除商品）？`,'移除商品',{
+                    confirmButtonText:'確認',
+                    cancelButtonText:'取消',
+                    customClass: 'PWACSS_MessageBox',
+                    type:'warning',
+                })
                 const res = await axios.delete(`/api/prize/removePrize/${itemId}`,{
                     headers:{
                         'x-user-token': jsCookie.get('authToken')
@@ -66,6 +72,12 @@ export default {
         },
         async purchase(itemId){
             try{
+                await this.$confirm(`確認進行操作（購買商品）？`,'購買商品',{
+                    confirmButtonText:'確認',
+                    cancelButtonText:'取消',
+                    customClass: 'PWACSS_MessageBox',
+                    type:'warning',
+                })
                 const res = await axios.post('/api/prize/purchase',{
                     itemId
                 },{

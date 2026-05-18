@@ -60,6 +60,12 @@ export default {
         },
         async removeMission(itemId){
             try{
+                await this.$confirm(`確認進行操作（移除任務）？`,'移除任務',{
+                    confirmButtonText:'確認',
+                    cancelButtonText:'取消',
+                    customClass: 'PWACSS_MessageBox',
+                    type:'warning',
+                })
                 const res = await axios.delete(`/api/mission/removeMission/${itemId}`,{
                     headers:{
                         'x-user-token': jsCookie.get('authToken')
@@ -73,6 +79,14 @@ export default {
         },
         async handleMission(itemId, action){
             try{
+
+                await this.$confirm(`確認進行操作（${action}）？`,'操作確認',{
+                    confirmButtonText:'確認',
+                    cancelButtonText:'取消',
+                    customClass: 'PWACSS_MessageBox',
+                    type:'warning',
+                })
+
                 const res = await axios.post('/api/mission/handleMission',{
                     itemId, action
                 },{
@@ -89,6 +103,14 @@ export default {
         },
         async allocateMoney(itemId){
             try{
+                
+                await this.$confirm(`確認進行操作（酬金撥款）？`,'酬金撥款',{
+                    confirmButtonText:'確認',
+                    cancelButtonText:'取消',
+                    customClass: 'PWACSS_MessageBox',
+                    type:'warning',
+                })
+
                 const res = await axios.get(`/api/mission/allocateMoney/${itemId}`,{
                     headers:{
                     'x-user-token': jsCookie.get('authToken')

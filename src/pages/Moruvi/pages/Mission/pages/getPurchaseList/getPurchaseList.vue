@@ -55,6 +55,12 @@ export default {
         },
         async completePrize(itemId){
             try{
+                await this.$confirm(`確認進行操作（兌換商品）？`,'兌換商品',{
+                    confirmButtonText:'確認',
+                    cancelButtonText:'取消',
+                    customClass: 'PWACSS_MessageBox',
+                    type:'warning',
+                })
                 const res = await axios.get(`/api/prize/completePrize/${itemId}`,{
                     headers:{
                         'x-user-token': jsCookie.get('authToken')
@@ -69,6 +75,12 @@ export default {
         },
         async cancelPrize(itemId){
             try{
+                await this.$confirm(`確認進行操作（申請退貨）？`,'申請退貨',{
+                    confirmButtonText:'確認',
+                    cancelButtonText:'取消',
+                    customClass: 'PWACSS_MessageBox',
+                    type:'warning',
+                })
                 const res = await axios.get(`/api/prize/cancelPrize/${itemId}`,{
                     headers:{
                         'x-user-token': jsCookie.get('authToken')
