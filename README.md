@@ -67,16 +67,19 @@ git clone https://github.com/your-repository/Moruvi.git
 cd Moruvi
 ```
 
-Install dependencies:
+frontend side:
 
 ```bash
 npm install
+npm run serve
 ```
 
-Development mode:
+backend side:
 
 ```bash
-npm run serve
+cd backend
+npm install
+node index.js
 ```
 
 ---
