@@ -274,6 +274,15 @@ router.delete('/api/mission/removeMission/:itemId', authMiddleware, async (req, 
             });
         }
 
+        const targetMission = mission.postMission.find(m => m.itemId === itemId);
+
+        if(targetMission?.status !== '待批准'){
+            return res.send({
+                type:'error',
+                message:'無法撤銷任務（任務已被批准）。',
+            });
+        }
+
         mission.postMission = mission.postMission.filter(m => m.itemId !== itemId);
 
         await mission.save();

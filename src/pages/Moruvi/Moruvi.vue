@@ -6,7 +6,7 @@
                 <div class="route-icon"><i class="el-icon-house"></i></div>
                 <div class="route-name">首頁</div>
             </div>
-            <div :class="{route:true, 'moruvi-route-selected':$route.path.includes('/moruvi/mission')}" @click="goTo('/moruvi/mission')">
+            <div :class="{route:true, 'moruvi-route-selected':$route.path.includes('/moruvi/mission') || $route.path.includes('/moruvi/prize-modifier') || $route.path.includes('/moruvi/mission-modifier')}" @click="goTo('/moruvi/mission')">
                 <div class="route-icon"><i class="el-icon-chat-line-round"></i></div>
                 <div class="route-name">請求</div>
             </div>

@@ -157,36 +157,10 @@ router.get('/api/prize/getSpecificPrize/:itemId', authMiddleware, async (req, re
     const { itemId } = req.params;
 
     try {
-        const user = await userModel.findOne({token: req.headers['x-user-token']});
-    
-        if(!user){
-            return res.send({
-                type:'error',
-                message:'用戶資料獲取失敗（查無此用戶）。',
-                data: {}
-            });
-        }
 
-        const roomId = user.roomId;
+        const myPrize = await prizeModel.findOne({ token: req.headers['x-user-token'] });
 
-        const room = await roomModel.findOne({ roomId });
-
-        if(!room){
-            return res.send({
-                type:'error',
-                message:'用戶資料獲取失敗（查無此房間）。',
-                data: {}
-            });
-        }
-
-        const partnerToken = room.owners.find(owner => owner !== user.token);
-        
-        const partnerPrize = await prizeModel.findOne({ token: partnerToken });
-
-        const myPrize = await prizeModel.findOne({ token: user.token });
-
-        const targetPrize = partnerPrize?.postPrize.find(p => p.itemId === itemId) 
-                            || myPrize?.postPrize.find(p => p.itemId === itemId);
+        const targetPrize = myPrize.exchangePrize.find(p => p.itemId === itemId);
 
         if(!targetPrize){
             return res.send({
