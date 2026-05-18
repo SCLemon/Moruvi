@@ -66,6 +66,12 @@ app.use(subscribeRouter);
 const notifyRouter = require('./routes/notifyRouter');
 app.use(notifyRouter);
 
+const missionRouter = require('./routes/missionRouter');
+app.use(missionRouter);
+
+const prizeRouter = require('./routes/prizeRouter');
+app.use(prizeRouter);
+
 app.listen(3008,()=>{
     console.log('server is running on port 3008')
 })

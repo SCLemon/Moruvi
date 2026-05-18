@@ -1,21 +1,20 @@
-// for /moruvi/more/home-setting
+// for /moruvi/mission
 
 // 全頁驗證機制
 const express = require('express');
 const router = express.Router();
 
 const userModel = require('../models/userModel');
-const roomModel = require('../models/roomModel');
+const prizeModel = require('../models/prizeModel');
 
 const authMiddleware = require('../middleware/auth.middleware');
 
-const { getFolderSize } = require('../middleware/checkUsageMemory.middleware')
-
 // 獲取資料
-router.get('/api/homeSetting/getData', authMiddleware, async (req, res) => {
+router.get('/api/prize/getData', authMiddleware, async (req, res) => {
 
     try {
         const user = await userModel.findOne({token: req.headers['x-user-token']});
+        const prize = await prizeModel.findOne({token: req.headers['x-user-token']});
 
         if(!user){
             return res.send({
@@ -25,33 +24,15 @@ router.get('/api/homeSetting/getData', authMiddleware, async (req, res) => {
             });
         }
 
-        const roomId = user.roomId;
-
-        const room = await roomModel.findOne({ roomId });
-
-        if(!room){
-            return res.send({
-                type:'error',
-                message:'用戶資料獲取失敗（查無此房間）。',
-                data: {}
-            });
-        }
-
-        const usage = await getFolderSize(room.database.url);
-
         const output = {
-            roomId: room.roomId,
-            roomName: room.roomName,
-            locked: room.locked,
-            memory: {
-                usage: (usage / 1024 / 1024).toFixed(2), // MB
-                limit: room.database.limit.memory / 1024
-            }
+            name: user.name,
+            userImgUrl: user.userImgUrl.url,
+            money: prize?.money || 0
         }
 
         return res.send({
             type:'success',
-            message:'房間資料獲取成功。',
+            message:'用戶資料獲取成功。',
             data: output
         });
 
@@ -65,20 +46,19 @@ router.get('/api/homeSetting/getData', authMiddleware, async (req, res) => {
 });
 
 // 修改資料
-router.put('/api/homeSetting/modifyData', authMiddleware, async (req, res) => {
-    const { roomName, locked } = req.body;
-    
+router.put('/api/myInfo/modifyData', authMiddleware, async (req, res) => {
+    const { name, password, mailAddress } = req.body;
     try {
         const user = await userModel.findOne({token: req.headers['x-user-token']});
 
         if(!user){
             return res.send({
                 type:'error',
-                message:'用戶資料獲取失敗（查無此用戶）。',
+                message:'用戶資料修改失敗（查無此用戶）。',
             });
         }
 
-        const isEmpty = Object.values({roomName, locked}).some(value => value == null || String(value).trim() === '');
+        const isEmpty = Object.values({name, password, mailAddress}).some(value => value == null || String(value).trim() === '');
         if(isEmpty){
             return res.send({
                 type:'success',
@@ -86,18 +66,15 @@ router.put('/api/homeSetting/modifyData', authMiddleware, async (req, res) => {
             });
         }
 
-        const roomId = user.roomId;
+        user.name = name;
+        user.password = password;
+        user.detail.mailAddress = mailAddress;
 
-        const room = await roomModel.findOne({ roomId });
-
-        room.roomName = roomName;
-        room.locked = locked;
-
-        await room.save();
-
+        await user.save();
+        
         return res.send({
             type:'success',
-            message:'房間資料修改成功。',
+            message:'用戶資料修改成功。',
         });
 
     } catch (e) {

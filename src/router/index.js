@@ -21,6 +21,10 @@ import List from '@/pages/Moruvi/pages/Notification/pages/List/List.vue'
 import Detail from '@/pages/Moruvi/pages/Notification/pages/Detail/Detail.vue'
 import SendMessage from '@/pages/Moruvi/pages/SendMessage/SendMessage.vue'
 
+import Mission from '@/pages/Moruvi/pages/Mission/Mission.vue'
+import MissionList from '@/pages/Moruvi/pages/Mission/pages/MissonList/MissionList.vue'
+import GetMissionList from '@/pages/Moruvi/pages/Mission/pages/getMissionList/getMissionList.vue'
+
 Vue.use(VueRouter)
 const router = new VueRouter({
     routes:[
@@ -47,6 +51,24 @@ const router = new VueRouter({
                 {
                     path:'sendMessage',
                     component: SendMessage,
+                },
+                {
+                    path:'mission',
+                    component: Mission,
+                    children:[
+                        {
+                            path:'mission-list',
+                            component: MissionList,
+                        },
+                        {
+                            path:'get-mission-list',
+                            component: GetMissionList,
+                        },
+                        {
+                            path:'/',
+                            redirect:'mission-list'
+                        }
+                    ]
                 },
                 {
                     path:'more',

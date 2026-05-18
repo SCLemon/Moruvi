@@ -1,0 +1,516 @@
+// for /moruvi/mission
+
+// 全頁驗證機制
+const express = require('express');
+const router = express.Router();
+
+const userModel = require('../models/userModel');
+const roomModel = require('../models/roomModel');
+const missionModel = require('../models/missionModel');
+
+const { v4: uuidv4 } = require('uuid');
+const { format } = require('date-fns');
+
+const authMiddleware = require('../middleware/auth.middleware');
+const prizeModel = require('../models/prizeModel');
+
+
+// 待批准、已批准、已駁回、待撥款、已完成
+
+// 獲取任務接取清單
+router.get('/api/mission/waitToGet', authMiddleware, async (req, res) => {
+
+    try {
+        const user = await userModel.findOne({token: req.headers['x-user-token']});
+    
+        if(!user){
+            return res.send({
+                type:'error',
+                message:'用戶資料獲取失敗（查無此用戶）。',
+                data: []
+            });
+        }
+
+        const roomId = user.roomId;
+
+        const room = await roomModel.findOne({ roomId });
+
+        if(!room){
+            return res.send({
+                type:'error',
+                message:'用戶資料獲取失敗（查無此房間）。',
+                data: []
+            });
+        }
+
+        const partnerToken = room.owners.find(owner => owner !== user.token);
+        
+        const [partnerPostMissionList, myPostMissionList] = await Promise.all([
+            missionModel.findOne({ token: partnerToken })
+                .then(m => m?.postMission ?? []),
+
+            missionModel.findOne({ token: user.token })
+                .then(m => m?.postMission ?? [])
+        ]);
+
+        const mergedList = [
+            ...partnerPostMissionList,
+            ...myPostMissionList
+        ]
+        .map(m => ({
+            itemId: m.itemId,
+            date: m.date,
+            money: m.money,
+            title: m.title,
+            description: m.description,
+            status: m.status,
+            isMine: m.creator === user.token
+        }))
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        return res.send({
+                type:'success',
+                message:'任務資料獲取成功。',
+                data: mergedList || [],
+            });
+
+
+    } catch (e) {
+        console.log(e)
+        return res.send({
+            type:'error',
+            message:'伺服器錯誤，請洽客服人員協助。'
+        });
+    }
+});
+
+// 獲取已接取的清單
+router.get('/api/mission/getMissionList', authMiddleware, async (req, res) => {
+
+    try {
+        const mission = await missionModel.findOne({token: req.headers['x-user-token']});
+    
+        if(!mission){
+            return res.send({
+                type:'error',
+                message:'用戶資料獲取成功。',
+                data: []
+            });
+        }
+
+        const output = mission.getMission
+        .map(m => ({
+            itemId: m.itemId,
+            date: m.date,
+            money: m.money,
+            title: m.title,
+            status: m.status,
+        })).reverse();
+
+        return res.send({
+                type:'success',
+                message:'任務資料獲取成功。',
+                data: output || [],
+            });
+
+
+    } catch (e) {
+        console.log(e)
+        return res.send({
+            type:'error',
+            message:'伺服器錯誤，請洽客服人員協助。'
+        });
+    }
+});
+
+// 任務發布
+router.post('/api/mission/postMission', authMiddleware, async (req, res) => {
+    const { title, description, money } = req.body;
+
+    try {
+        const user = await userModel.findOne({token: req.headers['x-user-token']});
+    
+        if(!user){
+            return res.send({
+                type:'error',
+                message:'用戶資料獲取失敗（查無此用戶）。',
+            });
+        }
+
+        const save = {
+            creator: user.token,
+            itemId: uuidv4(),
+            date: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
+            money,
+            title,
+            description,
+        }
+        let mission = await missionModel.findOne({ token: user.token });
+
+        if(!mission){
+            mission =await missionModel.create({
+                token: user.token,
+                postMission: [],
+                getMission: []
+            });
+        }
+        mission.postMission.push(save);
+
+        await mission.save();
+
+        return res.send({
+            type:'success',
+            message:'任務發布成功。',
+        });
+
+    } catch (e) {
+        console.log(e)
+        return res.send({
+            type:'error',
+            message:'伺服器錯誤，請洽客服人員協助。'
+        });
+    }
+});
+
+// 撤銷任務
+router.delete('/api/mission/removeMission/:itemId', authMiddleware, async (req, res) => {
+    const { itemId } = req.params;
+
+    try {
+        const user = await userModel.findOne({token: req.headers['x-user-token']});
+    
+        if(!user){
+            return res.send({
+                type:'error',
+                message:'用戶資料獲取失敗（查無此用戶）。',
+            });
+        }
+
+        const mission = await missionModel.findOne({ token: user.token });
+
+        if(!mission){
+            return res.send({
+                type:'error',
+                message:'任務資料獲取失敗（查無此任務）。',
+            });
+        }
+
+        mission.postMission = mission.postMission.filter(m => m.itemId !== itemId);
+
+        await mission.save();
+
+        return res.send({
+            type:'success',
+            message:'任務撤銷成功。',
+        });
+    } catch (e) {
+        console.log(e)
+        return res.send({
+            type:'error',
+            message:'伺服器錯誤，請洽客服人員協助。'
+        });
+    }
+});
+
+// 任務接取（批准與駁回）
+router.post('/api/mission/handleMission', authMiddleware, async (req, res) => {
+
+    const { action, itemId } = req.body; // 'approve' 或 'reject'
+
+    try {
+        const user = await userModel.findOne({token: req.headers['x-user-token']});
+    
+        if(!user){
+            return res.send({
+                type:'error',
+                message:'用戶資料獲取失敗（查無此用戶）。',
+                data: []
+            });
+        }
+
+        const roomId = user.roomId;
+
+        const room = await roomModel.findOne({ roomId });
+
+        if(!room){
+            return res.send({
+                type:'error',
+                message:'用戶資料獲取失敗（查無此房間）。',
+                data: []
+            });
+        }
+
+        const partnerToken = room.owners.find(owner => owner !== user.token);
+
+        const mission = await missionModel.findOne({ token: partnerToken });
+
+        if(!mission){
+            return res.send({
+                type:'error',
+                message:'任務資料獲取失敗（查無此任務）。',
+            });
+        }
+
+        const targetMission = mission.postMission.find(m => m.itemId === itemId);
+
+        if(!targetMission){
+            return res.send({
+                type:'error',
+                message:'任務資料獲取失敗（查無此任務）。',
+            });
+        }
+
+        if(action === 'approve'){
+            targetMission.status = '已批准';
+        } 
+        else if(action === 'reject'){
+            targetMission.status = '已駁回';
+        } 
+        else {
+            return res.send({
+                type:'error',
+                message:'無效的操作類型。',
+            });
+        }
+
+        await mission.save();
+
+        // 將任務狀態更新同步到接取者的 getMission 中
+        let myMission = await missionModel.findOne({ token: user.token });
+
+        if(!myMission){
+            myMission = await missionModel.create({
+                token: user.token,
+                postMission: [],
+                getMission: []
+            });
+        }
+
+        myMission.getMission.push(targetMission);
+
+        await myMission.save();
+
+        return res.send({
+            type:'success',
+            message:'任務處理成功。',
+        });
+
+
+    } catch (e) {
+        console.log(e)
+        return res.send({
+            type:'error',
+            message:'伺服器錯誤，請洽客服人員協助。'
+        });
+    }
+});
+
+// 任務完成
+router.get('/api/mission/completeMission/:itemId', authMiddleware, async (req, res) => {
+    const { itemId } = req.params;
+
+    try {
+        const user = await userModel.findOne({token: req.headers['x-user-token']});
+    
+        if(!user){
+            return res.send({
+                type:'error',
+                message:'用戶資料獲取失敗（查無此用戶）。',
+            });
+        }
+
+        const mission = await missionModel.findOne({ token: user.token });
+
+        if(!mission){
+            return res.send({
+                type:'error',
+                message:'任務資料獲取失敗（查無此任務）。',
+            });
+        }
+
+        const targetMission = mission.getMission.find(m => m.itemId === itemId);
+
+        if(!targetMission){
+            return res.send({
+                type:'error',
+                message:'任務資料獲取失敗（查無此任務）。',
+            });
+        }
+
+        targetMission.status = '待撥款';
+
+        await mission.save();
+
+        // 同步更新發布者的 postMission 中的任務狀態
+        const publisherMission = await missionModel.findOne({ token: targetMission.creator });
+
+        if(publisherMission){
+            const publisherTargetMission = publisherMission.postMission.find(m => m.itemId === itemId);
+            if(publisherTargetMission){
+                publisherTargetMission.status = '待撥款';
+                await publisherMission.save();
+            }
+        }
+
+        return res.send({
+            type:'success',
+            message:'任務完成狀態更新成功。',
+        });
+
+    } catch (e) {
+        console.log(e)
+        return res.send({
+            type:'error',
+            message:'伺服器錯誤，請洽客服人員協助。'
+        });
+    }
+});
+
+// 取消任務
+router.get('/api/mission/cancelMission/:itemId', authMiddleware, async (req, res) => {
+    const { itemId } = req.params;
+
+    try {
+        const user = await userModel.findOne({token: req.headers['x-user-token']});
+    
+        if(!user){
+            return res.send({
+                type:'error',
+                message:'用戶資料獲取失敗（查無此用戶）。',
+            });
+        }
+
+        const mission = await missionModel.findOne({ token: user.token });
+
+        if(!mission){
+            return res.send({
+                type:'error',
+                message:'任務資料獲取失敗（查無此任務）。',
+            });
+        }
+        
+        const targetMission = mission.getMission.find(m => m.itemId === itemId);
+
+        if(!targetMission){
+            return res.send({
+                type:'error',
+                message:'任務資料獲取失敗（查無此任務）。',
+            });
+        }
+
+        // 從 getMission 中移除該任務
+        mission.getMission = mission.getMission.filter(m => m.itemId !== itemId);
+
+        await mission.save();
+
+        // 同步更新發布者的 postMission 中的任務狀態
+        const publisherMission = await missionModel.findOne({ token: targetMission.creator });
+
+        if(publisherMission){
+            const publisherTargetMission = publisherMission.postMission.find(m => m.itemId === itemId);
+            if(publisherTargetMission){
+                publisherTargetMission.status = '待批准';
+                await publisherMission.save();
+            }
+        }
+
+        return res.send({
+            type:'success',
+            message:'任務取消狀態更新成功。',
+        });
+
+    } catch (e) {
+        console.log(e)
+        return res.send({
+            type:'error',
+            message:'伺服器錯誤，請洽客服人員協助。'
+        });
+    }
+});
+
+// 確認撥款
+router.get('/api/mission/allocateMoney/:itemId', authMiddleware, async (req, res) => {
+    
+    const { itemId } = req.params;
+
+    try {
+        const user = await userModel.findOne({token: req.headers['x-user-token']});
+    
+        if(!user){
+            return res.send({
+                type:'error',
+                message:'用戶資料獲取失敗（查無此用戶）。',
+            });
+        }
+
+        const roomId = user.roomId;
+
+        const room = await roomModel.findOne({ roomId });
+
+        if(!room){
+            return res.send({
+                type:'error',
+                message:'用戶資料獲取失敗（查無此房間）。',
+            });
+        }
+
+        const mission = await missionModel.findOne({ token: user.token });
+
+        if(!mission){
+            return res.send({
+                type:'error',
+                message:'任務資料獲取失敗（查無此任務）。',
+            });
+        }
+        
+        const targetMission = mission.postMission.find(m => m.itemId === itemId);
+
+        if(!targetMission){
+            return res.send({
+                type:'error',
+                message:'任務資料獲取失敗（查無此任務）。',
+            });
+        }
+
+        // 更新用戶的餘額
+        const partnerToken = room.owners.find(owner => owner !== user.token);
+        const money = targetMission.money;
+        const target = await prizeModel.findOne({ token: partnerToken });
+        if(!target){
+            await prizeModel.create({
+                token: partnerToken,
+                money: money
+            });
+        } else {
+            target.money += money;
+            await target.save();
+        }
+
+        // 同步更新發布者的 postMission 中的任務狀態
+        targetMission.status = '已完成';
+        await mission.save();
+
+        // 同步更新接取者的 getMission 中的任務狀態
+        const myMission = await missionModel.findOne({ token: partnerToken });
+        if(myMission){
+            const myTargetMission = myMission.getMission.find(m => m.itemId === itemId);
+            if(myTargetMission){
+                myTargetMission.status = '已完成';
+                await myMission.save();
+            }
+        }
+
+        return res.send({
+            type:'success',
+            message:'任務撥款狀態更新成功。',
+        });
+
+    } catch (e) {
+        console.log(e)
+        return res.send({
+            type:'error',
+            message:'伺服器錯誤，請洽客服人員協助。'
+        });
+    }
+});
+module.exports = router;

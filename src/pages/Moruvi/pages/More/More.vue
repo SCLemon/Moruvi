@@ -182,6 +182,7 @@ export default {
         justify-content: center;
         align-items: center;
         color: white;
+        font-size: 14px;
     }
     .user-avator{
         width: 100%;
