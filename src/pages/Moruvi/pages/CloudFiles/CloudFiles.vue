@@ -113,17 +113,12 @@ export default {
 
                 for(const file of files){
 
-                    this.uploadStatus.status = `${file.name} 圖片壓縮中...`;
-
-                    const compressedFile = await compressImage(file, 2560); // 最高 2K
-
-                    console.log(`原始: ${(file.size / 1024).toFixed(1)} KB → 壓縮後: ${(compressedFile.size / 1024).toFixed(1)} KB`);
 
                     this.uploadStatus.status = `${file.name} 準備上傳...`;
 
                     let formData = new FormData();
                     formData.append('folderId', this.folderId)
-                    formData.append("attachments", compressedFile, compressedFile.name);
+                    formData.append("attachments", file, file.name);
 
                     const res = await axios.post("/api/cloud/uploadFile", formData, {
                         headers: {
@@ -133,12 +128,12 @@ export default {
                         onUploadProgress:(progressEvent) => {
                             const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
 
-                            this.uploadStatus.status = `${compressedFile.name} ${percent}%`;
+                            this.uploadStatus.status = `正在上傳 ${file.name} ${percent}%`;
                         },
                     });
 
                     if(res.data.type !== 'success'){
-                        this.uploadStatus.status = `${compressedFile.name} 上傳失敗`;
+                        this.uploadStatus.status = `${file.name} 上傳失敗`;
                     }
                     else await this.getData();
                 }

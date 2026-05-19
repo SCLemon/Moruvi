@@ -220,7 +220,6 @@ export default {
         outline: 0;
     }
     .search-box-input::placeholder{
-        color: rgb(252, 211, 218);
         font-size: 14px;
     }
     .search-box-subText{
