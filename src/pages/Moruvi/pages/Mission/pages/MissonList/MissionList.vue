@@ -15,7 +15,7 @@
                         </template>
                         <div v-else class="list-button list-button-deny" @click.stop="removeMission(item.itemId)">撤銷</div>
                 </template>
-                <div v-else-if="item.status == '待撥款'" class="list-button list-button-get list-button-allocate" @click.stop="allocateMoney(item.itemId)">撥款</div>
+                <div v-else-if="item.status == '待撥款' && isMine" class="list-button list-button-get list-button-allocate" @click.stop="allocateMoney(item.itemId)">撥款</div>
                 <div v-else class="list-status">{{ item.status }}</div>
             </div>
         </div>
