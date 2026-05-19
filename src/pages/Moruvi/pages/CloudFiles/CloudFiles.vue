@@ -1,20 +1,23 @@
 <template>
   <div class="cloud-wrapper">
     <div class="folder-list-wrapper-mask" v-if="uploadStatus.isUploading">
-        圖片上傳中...
+        {{ uploadStatus.status }}
+    </div>
+    <div class="folder-list-wrapper-mask" v-if="previewStatus.isPreviewing" @click="closePreview()">
+        <img class="preview-image" :src="previewStatus.imageUrl" alt="">
     </div>
     <div class="header">
         <div class="header-back" @click="goTo('/moruvi/cloud-folders')"><i class="el-icon-arrow-left"></i></div>
         <div class="header-title">{{folderName}}</div>
     </div>
     <div class="folder-list-wrapper" v-if="list.length">
-        <div class="folder-list-item" v-for="(item, id) in list" :key="id">
+        <div class="folder-list-item" v-for="(item, id) in list" :key="id" @click="previewFile(item)">
             <i class="fa-solid fa-image folder-list-item-icon"></i>
             <div class="folder-list-item-content">
                 <div class="folder-list-item-content-title">{{ item.fileName }}</div>
                 <div class="folder-list-item-content-createTime">創建時間 {{ item.createTime }}</div>
             </div>
-            <div class="folder-list-item-more" @click="toggleOptionsList(item)">
+            <div class="folder-list-item-more" @click.stop="toggleOptionsList(item)">
                 <i class="fa-solid fa-bars"></i>
                 <div class="folder-list-item-more-options-box" v-if="item.showOptions">
                     <div class="folder-list-item-more-option" @click.stop="renameFile(item.fileId)">重新命名</div>
@@ -40,6 +43,10 @@ export default {
     name: 'CloudFiles',
     data(){
         return {
+            previewStatus:{
+                imageUrl:'',
+                isPreviewing: false,
+            },
             isDownloading: false,
             uploadStatus:{
                 isUploading: false,
@@ -221,6 +228,47 @@ export default {
                 }
                 this.$bus.$emit('handleAlert','系統訊息', res.data.message,res.data.type);
             }catch(e){}              
+        },
+
+        async previewFile(file){
+            this.previewStatus.isPreviewing = true;
+            try{
+                const res = await axios.get(`/api/cloud/downloadFile/${this.folderId}/${file.fileId}`,{
+                    headers:{
+                        'x-user-token': jsCookie.get('authToken')
+                    },
+                    responseType:'blob',
+                });
+
+                let filename = 'image.png';
+                const disposition = res.headers['content-disposition'];
+
+                if(disposition){
+                    const match = disposition.match(/filename="?(.+?)"?$/);
+                    if(match){
+                        filename = decodeURIComponent(match[1]);
+                    }
+                }
+
+                const url = window.URL.createObjectURL(new Blob([res.data]));
+
+                this.previewStatus.imageUrl = url;
+
+            }
+            catch(e){
+                console.log(e)
+                this.$bus.$emit('handleAlert','系統訊息','檔案預覽失敗','error');
+            }
+            finally{
+                this.isDownloading = false;
+            }
+        },
+        closePreview(){
+            this.previewStatus = {
+                isPreviewing: false,
+                imageUrl: '',
+            }
+            window.URL.revokeObjectURL(this.previewStatus.imageUrl);
         }
     }
 }
@@ -289,6 +337,9 @@ export default {
         display: flex;
         justify-content: center;
         align-items: center;
+    }
+    .preview-image{
+        width: 85%;
     }
     .folder-list-item{
         width: 100%;

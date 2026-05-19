@@ -492,18 +492,5 @@ router.get('/api/cloud/downloadFile/:folderId/:fileId', authMiddleware, async (r
         
 });
 
-// 返回頭貼
-router.get('/api/cloud/getImage/:filename',async (req, res) => {
-    
-    const filePath = path.join(avatarDir,req.params.filename);
-
-    if (fs.existsSync(filePath)) {
-        const fileStream = fs.createReadStream(filePath);
-        fileStream.pipe(res);
-    } else {
-        res.status(404).send('File not found');
-    }
-});
-
 module.exports = router;
    
