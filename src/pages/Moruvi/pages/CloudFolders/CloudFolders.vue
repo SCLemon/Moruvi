@@ -105,7 +105,7 @@ export default {
             try{
                 await this.$confirm('確認刪除資料夾？',{
                     cancelButtonText:'取消',
-                    confirmButtonText:'創建',
+                    confirmButtonText:'刪除',
                     customClass:'PWACSS_MessageBox',
                     type:'warning'
                 })
