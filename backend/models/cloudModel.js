@@ -9,6 +9,7 @@ const cloudSchema = new mongoose.Schema({
     },
     folders:[
         {
+            createTime: String,
             folderId:{
                 type: String,
                 trim: true,
@@ -38,7 +39,7 @@ const cloudSchema = new mongoose.Schema({
                         trim: true,
                         default: '新檔案',
                     },
-                    fileUrl:{
+                    filePath:{
                         type: String,
                         trim: true,
                         default: '',

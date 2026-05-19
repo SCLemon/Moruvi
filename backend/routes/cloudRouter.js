@@ -35,10 +35,16 @@ router.get('/api/cloud/folders', authMiddleware, async (req, res) => {
             await cloud.save();
         }
 
+        let folders = cloud.folders.map(folder => ({
+            folderId: folder.folderId,
+            folderName: folder.folderName,
+            createTime: format(folder.createTime, 'yyyy/MM/dd'),
+        })).reverse();
+
         return res.send({
             type:'success',
             message:'資料夾列表獲取成功。',
-            folders: cloud.folders
+            data: folders
         });
     } catch (e) {
         console.log(e);
@@ -79,6 +85,7 @@ router.post('/api/cloud/createFolder',authMiddleware, async (req, res) => {
         }
 
         cloud.folders.push({
+            createTime: format(new Date(), 'yyyy/MM/dd HH:mm:ss'),
             folderId: uuid,
             folderPath: newFolderPath,
             folderName,
@@ -101,11 +108,11 @@ router.post('/api/cloud/createFolder',authMiddleware, async (req, res) => {
 });
 
 // 刪除資料夾
-router.delete('/api/cloud/deleteFolder', authMiddleware, async (req, res) => {
+router.delete('/api/cloud/deleteFolder/:folderId', authMiddleware, async (req, res) => {
     
     const token = req.headers['x-user-token']
     
-    const { folderId } = req.body;
+    const { folderId } = req.params;
 
     try {
         const room = await roomModel.findOne({ owners: token });
@@ -137,11 +144,11 @@ router.delete('/api/cloud/deleteFolder', authMiddleware, async (req, res) => {
 });
 
 // 更改資料夾名稱
-router.put('/api/cloud/updateFolderName', authMiddleware, async (req, res) => {
+router.put('/api/cloud/renameFolder', authMiddleware, async (req, res) => {
     
     const token = req.headers['x-user-token']
     
-    const { folderId, newFolderName } = req.body;
+    const { folderId, folderName } = req.body;
 
     try {
         const room = await roomModel.findOne({ owners: token });
@@ -153,7 +160,7 @@ router.put('/api/cloud/updateFolderName', authMiddleware, async (req, res) => {
         const folderIndex = cloud.folders.findIndex(folder => folder.folderId === folderId);
         if(folderIndex === -1) return res.send({ type:'error', message:'查無資料夾。'});
 
-        cloud.folders[folderIndex].folderName = newFolderName;
+        cloud.folders[folderIndex].folderName = folderName;
         await cloud.save();
 
         return res.send({
