@@ -297,6 +297,7 @@ export default {
         border-radius: 60px;
         box-sizing: border-box;
         box-shadow: 0 0 3px rgba(210,210,210);
+        background: white;
         color: pink;
         position: absolute;
         bottom: 25px;
