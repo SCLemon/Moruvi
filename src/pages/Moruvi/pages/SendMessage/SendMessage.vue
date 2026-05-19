@@ -100,7 +100,7 @@ export default {
         margin-bottom: 15px;
         display: flex;
         align-items: center;
-        border-bottom: 1px solid rgba(210,210,210);
+        border-bottom: 1px solid pink;
         
     }
     .form-flag{
@@ -124,7 +124,7 @@ export default {
         width: 100%;
         min-height: 100px;
         max-height: calc(100vh - 320px);
-        border: 1px solid rgba(210,210,210);
+        border: 1px solid pink;
         box-sizing: border-box;
         overflow-y: scroll;
         outline: none;

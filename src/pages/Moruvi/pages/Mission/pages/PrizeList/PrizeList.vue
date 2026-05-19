@@ -176,7 +176,7 @@ export default {
         color: white;
     }
     .list-button-deny{
-        border: 0.1px solid rgba(0,0,0,0.2);
+        box-shadow: 0 0 3px rgba(0,0,0,0.2);
     }
     .list-button-allocate{
         margin-right: 0;

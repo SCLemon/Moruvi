@@ -1,0 +1,55 @@
+const mongoose = require('mongoose');
+
+const cloudSchema = new mongoose.Schema({
+    roomId:{
+        type: String,
+        trim: true,
+        unique: true,
+        required: true
+    },
+    folders:[
+        {
+            folderId:{
+                type: String,
+                trim: true,
+                unique: true,
+                required: true
+            },
+            folderPath:{
+                type: String,
+                trim: true,
+                default: '',
+            },
+            folderName:{
+                type: String,
+                trim: true,
+                default: '新資料夾',
+            },
+            files:[
+                {
+                    fileId:{
+                        type: String,
+                        trim: true,
+                        unique: true,
+                        required: true
+                    },
+                    fileName:{
+                        type: String,
+                        trim: true,
+                        default: '新檔案',
+                    },
+                    fileUrl:{
+                        type: String,
+                        trim: true,
+                        default: '',
+                    },
+                }
+             ]
+        }
+    ]
+});
+
+
+const cloudModel = mongoose.model('Cloud', cloudSchema);
+
+module.exports = cloudModel;

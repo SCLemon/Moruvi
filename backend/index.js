@@ -72,6 +72,9 @@ app.use(missionRouter);
 const prizeRouter = require('./routes/prizeRouter');
 app.use(prizeRouter);
 
+const cloudRouter = require('./routes/cloudRouter');
+app.use(cloudRouter);
+
 app.listen(3008,()=>{
     console.log('server is running on port 3008')
 })

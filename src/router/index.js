@@ -30,6 +30,8 @@ import PrizeList from '@/pages/Moruvi/pages/Mission/pages/PrizeList/PrizeList.vu
 import PrizeModifier from '@/pages/Moruvi/pages/PrizeModifier/PrizeModifier.vue'
 import GetPurchaseList from '@/pages/Moruvi/pages/Mission/pages/getPurchaseList/getPurchaseList.vue'
 
+import CloudFolders from '@/pages/Moruvi/pages/CloudFolders/CloudFolders.vue'
+
 Vue.use(VueRouter)
 const router = new VueRouter({
     routes:[
@@ -90,6 +92,10 @@ const router = new VueRouter({
                 {
                     path:'prize-modifier/:itemId?',
                     component: PrizeModifier,
+                },
+                {
+                    path:'cloud-folders',
+                    component: CloudFolders,
                 },
                 {
                     path:'more',

@@ -10,7 +10,7 @@
                 <div class="route-icon"><i class="el-icon-chat-line-round"></i></div>
                 <div class="route-name">請求</div>
             </div>
-            <div :class="{route:true, 'moruvi-route-selected':$route.path.includes('/moruvi/memoirs')}">
+            <div :class="{route:true, 'moruvi-route-selected':$route.path.includes('/moruvi/cloud-folders')}" @click="goTo('/moruvi/cloud-folders')">
                 <div class="route-icon"><i class="el-icon-reading"></i></div>
                 <div class="route-name">回憶錄</div>
             </div>
