@@ -232,7 +232,7 @@ export default {
     }
     .folder-list-wrapper{
         width: calc(100% - 40px);
-        height: calc(100vh - 155px);
+        height: calc(100vh - 140px);
         margin: 0 auto;
         box-sizing: border-box;
         overflow-y: scroll;

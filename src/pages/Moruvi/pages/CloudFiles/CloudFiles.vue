@@ -310,7 +310,7 @@ export default {
     }
     .folder-list-wrapper{
         width: 100%;
-        height: calc(100vh - 155px);
+        height: calc(100vh - 140px);
         margin: 0 auto;
         box-sizing: border-box;
         overflow-y: scroll;
