@@ -134,6 +134,7 @@ export default {
 
                     if(res.data.type !== 'success'){
                         this.uploadStatus.status = `${file.name} 上傳失敗`;
+                        this.$bus.$emit('handleAlert','系統通知', res.data.message, res.data.type);
                     }
                     else await this.getData();
                 }
