@@ -51,8 +51,8 @@ app.use(mileStoneRouter);
 const overviewRouter = require('./routes/overviewRouter');
 app.use(overviewRouter);
 
-const imgRouter = require('./routes/imgRouter');
-app.use(imgRouter);
+const avatorRouter = require('./routes/avatorRouter');
+app.use(avatorRouter);
 
 const myInfoRouter = require('./routes/myInfoRouter');
 app.use(myInfoRouter);

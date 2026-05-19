@@ -28,6 +28,7 @@ const cloudSchema = new mongoose.Schema({
             },
             files:[
                 {
+                    createTime: String,
                     fileId:{
                         type: String,
                         trim: true,
