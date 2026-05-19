@@ -11,16 +11,16 @@
         <div class="header-back" @click="goTo('/moruvi/cloud-folders')"><i class="el-icon-arrow-left"></i></div>
         <div class="header-title">{{folderName}}</div>
     </div>
-    <div class="folder-list-wrapper" v-if="list.length">
+    <div class="folder-list-wrapper" v-if="list.length" ref="folder-list-wrapper" @scroll="handleScroll()">
         <div class="folder-list-item" v-for="(item, id) in list" :key="id" @click="previewFile(item)">
             <i class="fa-solid fa-image folder-list-item-icon"></i>
             <div class="folder-list-item-content">
                 <div class="folder-list-item-content-title">{{ item.fileName }}</div>
                 <div class="folder-list-item-content-createTime">創建時間 {{ item.createTime }}</div>
             </div>
-            <div class="folder-list-item-more" @click.stop="toggleOptionsList(item)">
+            <div :class="{'folder-list-item-more': true, 'more-selected': item.showOptions}" @click.stop="toggleOptionsList(item)">
                 <i class="fa-solid fa-bars"></i>
-                <div class="folder-list-item-more-options-box" v-if="item.showOptions">
+                <div :class="{'folder-list-item-more-options-box': true, 'folder-list-item-more-options-box-last': (id === list.length - 1 && id !== 0)}" v-if="item.showOptions">
                     <div class="folder-list-item-more-option" @click.stop="renameFile(item.fileId)">重新命名</div>
                     <div class="folder-list-item-more-option" @click.stop="!isDownloading?downloadFile(item):''">{{ !isDownloading? '下載': '下載中' }}</div>
                     <div class="folder-list-item-more-option" @click.stop="removeFile(item.fileId)">刪除</div>
@@ -31,7 +31,7 @@
     <div class="folder-list-wrapper folder-list-wrapper-none" v-else>
         <el-empty description="查無回憶錄"></el-empty>
     </div>
-    <div class="folder-add-button" @click="openUpload()"><i class="fa-solid fa-plus"></i></div>
+    <div class="folder-add-button" v-if="showAddButton" @click="openUpload()"><i class="fa-solid fa-plus"></i></div>
     <input type="file" ref="uploadImages" multiple accept="image/*" style="display: none;" @change="addFile()">
   </div>
 </template>
@@ -58,12 +58,22 @@ export default {
             folderName:'',
             list: [],
             keyword:'',
+            showAddButton: true,
         }
     },
     async mounted(){
         await this.getData();
     },
     methods:{
+        handleScroll(){
+            const buffer = 10;
+            const el = this.$refs['folder-list-wrapper'];
+
+            if(el.scrollTop + el.clientHeight >= el.scrollHeight - buffer){
+                this.showAddButton = false;
+            }
+            else this.showAddButton = true;
+        },
         goTo(path) {
             this.$router.replace(path).catch((e)=>{});
         },
@@ -378,16 +388,25 @@ export default {
         line-height: 60px;
         position: relative;
     }
+    .more-selected{
+        background: pink;
+        color: white;
+    }
     .folder-list-item-more-options-box{
         position: absolute;
         width: 80px;
         font-size: 14px;
-        top: 50px;
-        right: 10px;
-        box-shadow: 0 0 3px rgba(210,210,210);
+        top: 20px;
+        right: 55px;
+        box-shadow: 0 0 9px pink;
         background: white;
         z-index: 1;
         font-size: 12px;
+        color: black;
+    }
+    .folder-list-item-more-options-box-last{
+        top:auto;
+        bottom: 0px;
     }
     .folder-list-item-more-option{
         width: 100%;
@@ -395,13 +414,14 @@ export default {
         display: flex;
         justify-content: center;
         align-items: center;
+        box-sizing: border-box;
     }
     .folder-add-button{
         width: 60px;
         height: 60px;
         border-radius: 60px;
         box-sizing: border-box;
-        box-shadow: 0 0 3px rgba(210,210,210);
+        box-shadow: 0 0 9px pink;
         background: white;
         color: pink;
         position: absolute;
