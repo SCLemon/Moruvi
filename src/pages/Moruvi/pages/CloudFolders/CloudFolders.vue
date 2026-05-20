@@ -15,7 +15,7 @@
             <div :class="{'folder-list-item-more': true, 'more-selected': item.showOptions}" @click.stop="toggleOptionsList(item)">
                 <i class="fa-solid fa-bars"></i>
                 <div :class="{'folder-list-item-more-options-box': true, 'folder-list-item-more-options-box-last': (id === list.length - 1 && id !== 0)}" v-if="item.showOptions">
-                    <div class="folder-list-item-more-option" @click.stop="renameFolder(item.folderId)">重新命名</div>
+                    <div class="folder-list-item-more-option" @click.stop="renameFolder(item)">重新命名</div>
                     <div class="folder-list-item-more-option" @click.stop="!isDownloading?downloadFolder(item):''">{{ !isDownloading? '下載': '下載中' }}</div>
                     <div class="folder-list-item-more-option" @click.stop="removeFolder(item.folderId)">刪除</div>
                 </div>
@@ -97,12 +97,12 @@ export default {
                     }
                 });
                 if(res.data.type == 'success'){
-                    await this.getData();
+                    this.list.unshift(res.data.data);
                 }
                 this.$bus.$emit('handleAlert','系統訊息', res.data.message,res.data.type);
             }catch(e){}  
         },
-        async renameFolder(folderId){
+        async renameFolder(folder){
             try{
                 const { value } = await this.$prompt('請輸入資料夾名稱',{
                     cancelButtonText:'取消',
@@ -111,7 +111,7 @@ export default {
                     type:'warning'
                 })
                 const res = await axios.put('/api/cloud/renameFolder',{
-                    folderId,
+                    folderId: folder.folderId,
                     folderName: value
                 },{
                     headers:{
@@ -119,7 +119,8 @@ export default {
                     }
                 });
                 if(res.data.type == 'success'){
-                    await this.getData();
+                    folder.folderName = res.data.data.folderName;
+                    this.toggleOptionsList(folder);
                 }
                 this.$bus.$emit('handleAlert','系統訊息', res.data.message,res.data.type);
             }catch(e){}  
@@ -180,7 +181,7 @@ export default {
                     }
                 });
                 if(res.data.type == 'success'){
-                    await this.getData();
+                    this.list = this.list.filter(folder => folder.folderId != folderId);
                 }
                 this.$bus.$emit('handleAlert','系統訊息', res.data.message,res.data.type);
             }catch(e){}              

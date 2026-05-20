@@ -17,9 +17,10 @@
             </div>
             <div :class="{'folder-list-item-more': true, 'more-selected': item.showOptions}"  @click.stop="!item.isUploading?toggleOptionsList(item):''">
                 <i class="fa-solid fa-bars" v-if="!item.isUploading"></i>
-                <i class="fa-solid fa-exclamation" style="color: red;" v-if="item.isFailed"></i>
+                <i class="fa-solid fa-exclamation" style="color: red;" v-else-if="item.isFailed"></i>
+                <div v-else-if="item.isUploading" style="color: pink;">{{ item.percent + '%' }}</div>
                 <div :class="{'folder-list-item-more-options-box': true, 'folder-list-item-more-options-box-last': (id === list.length - 1 && id !== 0)}" v-if="item.showOptions">
-                    <div class="folder-list-item-more-option" @click.stop="!item.isUploading?renameFile(item.fileId):''">重新命名</div>
+                    <div class="folder-list-item-more-option" @click.stop="!item.isUploading?renameFile(item):''">重新命名</div>
                     <div class="folder-list-item-more-option" @click.stop="(!isDownloading && !item.isUploading)?downloadFile(item):''">{{ !isDownloading? '下載': '下載中' }}</div>
                     <div class="folder-list-item-more-option" @click.stop="!item.isUploading?removeFile(item.fileId):''">刪除</div>
                 </div>
@@ -163,7 +164,6 @@ export default {
                             } 
                             else {
                                 this.$bus.$emit('handleAlert', '系統通知', res.data.message, res.data.type);
-                                // 如果失敗了，把轉圈圈狀態關掉
                                 newUploadItem.isFailed = true;
                             }
                         } catch (error) {
@@ -190,7 +190,7 @@ export default {
                 this.$refs.uploadImages.value = '';
             }
         },
-        async renameFile(fileId){
+        async renameFile(file){
             try{
                 const { value } = await this.$prompt('請輸入檔案名稱',{
                     cancelButtonText:'取消',
@@ -200,7 +200,7 @@ export default {
                 })
                 const res = await axios.put('/api/cloud/renameFile',{
                     folderId: this.folderId,
-                    fileId,
+                    fileId: file.fileId,
                     fileName: value
                 },{
                     headers:{
@@ -208,7 +208,8 @@ export default {
                     }
                 });
                 if(res.data.type == 'success'){
-                    await this.getData();
+                    file.fileName = res.data.data.fileName
+                    this.toggleOptionsList(file);
                 }
                 this.$bus.$emit('handleAlert','系統訊息', res.data.message,res.data.type);
             }catch(e){}  
@@ -273,7 +274,7 @@ export default {
                     }
                 });
                 if(res.data.type == 'success'){
-                    await this.getData();
+                    this.list = this.list.filter(file => file.fileId != fileId);
                 }
                 this.$bus.$emit('handleAlert','系統訊息', res.data.message,res.data.type);
             }catch(e){}              
