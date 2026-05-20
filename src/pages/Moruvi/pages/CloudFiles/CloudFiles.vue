@@ -15,15 +15,16 @@
                 <div class="folder-list-item-content-title">{{ item.fileName }}</div>
                 <div class="folder-list-item-content-createTime">創建時間 {{ item.createTime }}</div>
             </div>
-            <div :class="{'folder-list-item-more': true, 'more-selected': item.showOptions}" @click.stop="!item.isUploading?toggleOptionsList(item):''">
-                <i class="fa-solid fa-bars"></i>
+            <div :class="{'folder-list-item-more': true, 'more-selected': item.showOptions}"  @click.stop="!item.isUploading?toggleOptionsList(item):''">
+                <i class="fa-solid fa-bars" v-if="!item.isUploading"></i>
+                <i class="fa-solid fa-exclamation" style="color: red;" v-if="item.isFailed"></i>
                 <div :class="{'folder-list-item-more-options-box': true, 'folder-list-item-more-options-box-last': (id === list.length - 1 && id !== 0)}" v-if="item.showOptions">
                     <div class="folder-list-item-more-option" @click.stop="!item.isUploading?renameFile(item.fileId):''">重新命名</div>
                     <div class="folder-list-item-more-option" @click.stop="(!isDownloading && !item.isUploading)?downloadFile(item):''">{{ !isDownloading? '下載': '下載中' }}</div>
                     <div class="folder-list-item-more-option" @click.stop="!item.isUploading?removeFile(item.fileId):''">刪除</div>
                 </div>
             </div>
-            <div class="folder-list-item-percent-bar" v-if="item.isUploading" :style="{width: item.percent +'%'}"></div>
+            <div :class="{'folder-list-item-percent-bar': true, 'folder-list-item-percent-bar-error': item.isFailed}" v-if="item.isUploading" :style="{width: item.percent +'%'}"></div>
         </div>
     </div>
     <div class="folder-list-wrapper folder-list-wrapper-none" v-else>
@@ -96,57 +97,90 @@ export default {
             this.$refs['uploadImages'].click();
         },
 
-        async addFile(){
-            try{
+        async addFile() {
+            try {
                 const files = this.$refs.uploadImages.files;
+                if (!files || files.length === 0) return;
 
-                if(!files || files.length === 0) return;
+                const fileQueue = [];
+                
+                for (const file of files) {
+                    
+                    const uniqueKey = Math.random().toString(36).substring(2) + Date.now().toString(36);
 
-                for(const file of files){
-
-                    const index = new Date().getTime();
-
-                    this.list.unshift({
-                        index: index,
+                    const newUploadItem = {
+                        index: uniqueKey,
                         createTime: format(new Date(), 'yyyy/MM/dd'),
                         fileId: '',
                         fileName: file.name,
                         isUploading: true,
+                        isFailed: false,
                         percent: 0,
-                    })
+                    };
 
-                    let formData = new FormData();
-                    formData.append('folderId', this.folderId)
-                    formData.append("attachments", file, file.name);
+                    this.list.unshift(newUploadItem);
 
-                    const res = await axios.post("/api/cloud/uploadFile", formData, {
-                        headers: {
-                            "Content-Type": "multipart/form-data",
-                            "x-user-token": jsCookie.get('authToken'),
-                        },
-                        onUploadProgress:(progressEvent) => {
-                            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                            let item = this.list.find(item => item.index === index);
-                            if (item) item.percent = percent;
-                        },
-                    });
+                    fileQueue.push({ file, uniqueKey, newUploadItem });
+                }
 
-                    if(res.data.type == 'success'){
-                        const targetIndex = this.list.findIndex(item => item.index == index);
-                        if (targetIndex !== -1) {
-                            this.$set(this.list, targetIndex, res.data.data);
+
+                const uploadWorker = async () => {
+
+                    while (fileQueue.length > 0) {
+                        const task = fileQueue.shift();
+                        if (!task) break;
+
+                        const { file, uniqueKey, newUploadItem } = task;
+
+                        try {
+                            let formData = new FormData();
+                            formData.append('folderId', this.folderId);
+                            formData.append("attachments", file, file.name);
+
+                            const res = await axios.post("/api/cloud/uploadFile", formData, {
+                                headers: {
+                                    "Content-Type": "multipart/form-data",
+                                    "x-user-token": jsCookie.get('authToken'),
+                                },
+                                onUploadProgress: (progressEvent) => {
+                                    const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                                    newUploadItem.percent = percent;
+                                },
+                            });
+
+                            if (res.data.type === 'success') {
+                                const targetIndex = this.list.findIndex(item => item.index === uniqueKey);
+                                if (targetIndex !== -1) {
+                                    this.$set(this.list, targetIndex, res.data.data);
+
+                                }
+                            } 
+                            else {
+                                this.$bus.$emit('handleAlert', '系統通知', res.data.message, res.data.type);
+                                // 如果失敗了，把轉圈圈狀態關掉
+                                newUploadItem.isFailed = true;
+                            }
+                        } catch (error) {
+                            newUploadItem.isFailed = true;
+                            this.$bus.$emit('handleAlert', '系統通知', `${file.name} 上傳發生錯誤`, 'error');
                         }
                     }
-                    else {
-                         this.$bus.$emit('handleAlert','系統通知', res.data.message, res.data.type);
-                    }
-                    // else await this.getData();
+                };
+
+                const CONCURRENCY_LIMIT = 3;
+                const workers = [];
+                
+                const workerCount = Math.min(CONCURRENCY_LIMIT, fileQueue.length);
+                
+                for (let i = 0; i < workerCount; i++) {
+                    workers.push(uploadWorker());
                 }
-            }
-            catch(e){
+
+                await Promise.all(workers);
+
+            } catch (e) {
                 console.error(e);
-            }
-            finally{
+            } finally {
                 this.$refs.uploadImages.value = '';
             }
         },
@@ -439,5 +473,8 @@ export default {
         left: 0;
         background: pink;
         box-sizing: border-box;
+    }
+    .folder-list-item-percent-bar-error{
+        background: red;
     }
 </style>

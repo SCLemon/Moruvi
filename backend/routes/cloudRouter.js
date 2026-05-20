@@ -358,7 +358,7 @@ router.post('/api/cloud/uploadFile',authMiddleware, upload.fields([{ name: 'atta
             data:{
                 fileId: uuid,
                 fileName: file.originalname,
-                createTime: createTime,
+                createTime: format(new Date(), 'yyyy/MM/dd'),
             }
         });
     } catch (e) {
