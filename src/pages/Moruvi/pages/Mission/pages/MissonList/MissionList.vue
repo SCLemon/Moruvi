@@ -2,7 +2,7 @@
   <div class="list-wrapper">
     <div class="list-add-mission" @click="goTo('/moruvi/mission-modifier?from=mission-list')">張貼任務</div>
     <template v-if="list.length">
-        <div class="list" v-for="(item, id) in list" :key="id" @click="goTo(`/moruvi/mission-modifier/${item.itemId}?from=mission-list`)">
+        <div :class="{list: true, myList: item.isMine}" v-for="(item, id) in list" :key="id" @click="goTo(`/moruvi/mission-modifier/${item.itemId}?from=mission-list`)">
             <div class="list-content-wrapper">
                 <div class="list-content">{{item.title}}</div>
                 <div class="list-money">{{item.money}} 金幣</div>
@@ -15,7 +15,7 @@
                         </template>
                         <div v-else class="list-button list-button-deny" @click.stop="removeMission(item.itemId)">撤銷</div>
                 </template>
-                <div v-else-if="item.status == '待撥款' && isMine" class="list-button list-button-get list-button-allocate" @click.stop="allocateMoney(item.itemId)">撥款</div>
+                <div v-else-if="item.status == '待撥款' && item.isMine" class="list-button list-button-get list-button-allocate" @click.stop="allocateMoney(item.itemId)">撥款</div>
                 <div v-else class="list-status">{{ item.status }}</div>
             </div>
         </div>
@@ -162,6 +162,9 @@ export default {
         align-items: center;
         padding-left: 15px;
         padding-right: 15px;
+    }
+    .myList{
+        box-shadow: 0px 0px 8px rgb(255, 224, 229);
     }
     .list-content-wrapper{
         width: calc(100% - 120px);
