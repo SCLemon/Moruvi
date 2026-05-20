@@ -40,6 +40,7 @@
 import axios from 'axios';
 import jsCookie from 'js-cookie';
 import { format } from 'date-fns';
+import heic2any from 'heic2any';
 
 export default {
     name: 'CloudFiles',
@@ -290,8 +291,25 @@ export default {
                     },
                     responseType:'blob',
                 });
+                
+                let imageBlob = res.data;
 
-                this.previewStatus.imageUrl = URL.createObjectURL(res.data);
+                const isHeic = file.fileName?.toLowerCase().endsWith('.heic') || imageBlob.type === 'image/heic';
+
+                if (isHeic) {
+                    this.previewStatus.status = 'HEIC 格式轉換中...';
+                    
+                    // 2. 進行轉檔：這裡轉成不失真的 PNG
+                    // 如果想轉成高畫質 JPG，可以改為 toType: 'image/jpeg', quality: 0.95
+                    const convertedBlob = await heic2any({
+                        blob: imageBlob,
+                        toType: 'image/png' 
+                    });
+
+                    imageBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+                }
+
+                this.previewStatus.imageUrl = URL.createObjectURL(imageBlob);
 
             }
             catch(e){

@@ -15,6 +15,7 @@
     "date-fns": "^4.1.0",
     "dompurify": "^3.3.1",
     "element-ui": "^2.15.14",
+    "heic2any": "^0.0.4",
     "html2canvas": "^1.4.1",
     "js-cookie": "^3.0.5",
     "jsbarcode": "^3.11.6",
