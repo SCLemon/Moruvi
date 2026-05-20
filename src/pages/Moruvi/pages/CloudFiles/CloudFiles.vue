@@ -281,7 +281,6 @@ export default {
         },
 
         async previewFile(file){
-            console.log(file)
             this.previewStatus.isPreviewing = true;
             try{
                 this.previewStatus.status = '圖片下載中...'
