@@ -19,7 +19,6 @@
     "js-cookie": "^3.0.5",
     "jsbarcode": "^3.11.6",
     "pdfjs-dist": "^2.16.105",
-    "uuidv4": "^6.2.13",
     "vue": "^2.6.14",
     "vue-router": "^3.6.5"
   },

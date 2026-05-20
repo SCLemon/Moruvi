@@ -1,8 +1,5 @@
 <template>
   <div class="cloud-wrapper">
-    <div class="folder-list-wrapper-mask" v-if="uploadStatus.isUploading">
-        {{ uploadStatus.status }}
-    </div>
     <div class="folder-list-wrapper-mask" v-if="previewStatus.isPreviewing" @click="closePreview()">
         <img v-if="previewStatus.imageUrl" class="preview-image" :src="previewStatus.imageUrl" alt="">
         <div v-else>{{ previewStatus.status }}</div>
@@ -12,20 +9,21 @@
         <div class="header-title">{{folderName}}</div>
     </div>
     <div class="folder-list-wrapper" v-if="list.length" ref="folder-list-wrapper" @scroll="handleScroll()">
-        <div class="folder-list-item" v-for="(item, id) in list" :key="id" @click="previewFile(item)">
+        <div class="folder-list-item" v-for="(item, id) in list" :key="id" @click="!item.isUploading?previewFile(item):''">
             <i class="fa-solid fa-image folder-list-item-icon"></i>
             <div class="folder-list-item-content">
                 <div class="folder-list-item-content-title">{{ item.fileName }}</div>
                 <div class="folder-list-item-content-createTime">創建時間 {{ item.createTime }}</div>
             </div>
-            <div :class="{'folder-list-item-more': true, 'more-selected': item.showOptions}" @click.stop="toggleOptionsList(item)">
+            <div :class="{'folder-list-item-more': true, 'more-selected': item.showOptions}" @click.stop="!item.isUploading?toggleOptionsList(item):''">
                 <i class="fa-solid fa-bars"></i>
                 <div :class="{'folder-list-item-more-options-box': true, 'folder-list-item-more-options-box-last': (id === list.length - 1 && id !== 0)}" v-if="item.showOptions">
-                    <div class="folder-list-item-more-option" @click.stop="renameFile(item.fileId)">重新命名</div>
-                    <div class="folder-list-item-more-option" @click.stop="!isDownloading?downloadFile(item):''">{{ !isDownloading? '下載': '下載中' }}</div>
-                    <div class="folder-list-item-more-option" @click.stop="removeFile(item.fileId)">刪除</div>
+                    <div class="folder-list-item-more-option" @click.stop="!item.isUploading?renameFile(item.fileId):''">重新命名</div>
+                    <div class="folder-list-item-more-option" @click.stop="(!isDownloading && !item.isUploading)?downloadFile(item):''">{{ !isDownloading? '下載': '下載中' }}</div>
+                    <div class="folder-list-item-more-option" @click.stop="!item.isUploading?removeFile(item.fileId):''">刪除</div>
                 </div>
             </div>
+            <div class="folder-list-item-percent-bar" v-if="item.isUploading" :style="{width: item.percent +'%'}"></div>
         </div>
     </div>
     <div class="folder-list-wrapper folder-list-wrapper-none" v-else>
@@ -39,7 +37,8 @@
 <script>
 import axios from 'axios';
 import jsCookie from 'js-cookie';
-import { compressImage } from '@/utils/js/compressor';
+import { format } from 'date-fns';
+
 export default {
     name: 'CloudFiles',
     data(){
@@ -50,10 +49,6 @@ export default {
                 status:'',
             },
             isDownloading: false,
-            uploadStatus:{
-                isUploading: false,
-                status: '',
-            },
             folderId: this.$route.params.folderId,
             folderName:'',
             list: [],
@@ -102,19 +97,23 @@ export default {
         },
 
         async addFile(){
-
-            this.uploadStatus.isUploading = true;
-
             try{
-                this.uploadStatus.status = '程序開始執行...';
                 const files = this.$refs.uploadImages.files;
 
                 if(!files || files.length === 0) return;
 
                 for(const file of files){
 
+                    const index = new Date().getTime();
 
-                    this.uploadStatus.status = `${file.name} 準備上傳...`;
+                    this.list.unshift({
+                        index: index,
+                        createTime: format(new Date(), 'yyyy/MM/dd'),
+                        fileId: '',
+                        fileName: file.name,
+                        isUploading: true,
+                        percent: 0,
+                    })
 
                     let formData = new FormData();
                     formData.append('folderId', this.folderId)
@@ -127,25 +126,27 @@ export default {
                         },
                         onUploadProgress:(progressEvent) => {
                             const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-
-                            this.uploadStatus.status = `正在上傳 ${file.name} ${percent}%`;
+                            let item = this.list.find(item => item.index === index);
+                            if (item) item.percent = percent;
                         },
                     });
 
-                    if(res.data.type !== 'success'){
-                        this.uploadStatus.status = `${file.name} 上傳失敗`;
-                        this.$bus.$emit('handleAlert','系統通知', res.data.message, res.data.type);
+                    if(res.data.type == 'success'){
+                        const targetIndex = this.list.findIndex(item => item.index == index);
+                        if (targetIndex !== -1) {
+                            this.$set(this.list, targetIndex, res.data.data);
+                        }
                     }
-                    else await this.getData();
+                    else {
+                         this.$bus.$emit('handleAlert','系統通知', res.data.message, res.data.type);
+                    }
+                    // else await this.getData();
                 }
-                this.uploadStatus.status = '全部上傳完成';
             }
             catch(e){
                 console.error(e);
-                this.uploadStatus.status = '上傳失敗';
             }
             finally{
-                this.uploadStatus.isUploading = false;
                 this.$refs.uploadImages.value = '';
             }
         },
@@ -239,6 +240,7 @@ export default {
         },
 
         async previewFile(file){
+            console.log(file)
             this.previewStatus.isPreviewing = true;
             try{
                 this.previewStatus.status = '圖片下載中...'
@@ -349,6 +351,7 @@ export default {
         display: flex;
         justify-content: space-evenly;
         align-items: center;
+        position: relative;
     }
     .folder-list-item-icon{
         width: 40px;
@@ -427,5 +430,14 @@ export default {
         justify-content: center;
         align-items: center;
         font-size: 24px;
+    }
+    .folder-list-item-percent-bar{
+        width: 0;
+        height: 2.5px;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        background: pink;
+        box-sizing: border-box;
     }
 </style>
