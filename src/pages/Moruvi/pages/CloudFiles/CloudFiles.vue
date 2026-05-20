@@ -103,10 +103,16 @@ export default {
                 if (!files || files.length === 0) return;
 
                 const fileQueue = [];
-                
+                const MAX_SINGLE_SIZE = 25 * 1024 * 1024;
+
                 for (const file of files) {
                     
                     const uniqueKey = Math.random().toString(36).substring(2) + Date.now().toString(36);
+
+                    if (file.size > MAX_SINGLE_SIZE) {
+                        this.$bus.$emit('handleAlert', '系統通知', `檔案「${file.name}」超過 25 MB，已自動忽略`, 'warning');
+                        continue;
+                    }
 
                     const newUploadItem = {
                         index: uniqueKey,
@@ -473,6 +479,7 @@ export default {
         left: 0;
         background: pink;
         box-sizing: border-box;
+        transition: width 0.25s ease;
     }
     .folder-list-item-percent-bar-error{
         background: red;
