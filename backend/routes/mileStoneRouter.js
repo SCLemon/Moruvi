@@ -17,7 +17,7 @@ const authMiddleware = require('../middleware/auth.middleware');
 router.get('/api/milestone/getData', authMiddleware, async (req, res) => {
 
     try {
-        const user = await userModel.findOne({token: req.headers['x-user-token']});
+        const user = req.user;
 
         const roomId = user.roomId;
 
@@ -52,8 +52,7 @@ router.get('/api/milestone/getData', authMiddleware, async (req, res) => {
 router.post('/api/milestone/add', authMiddleware, async (req, res) => {
 
     try {
-        const user = await userModel.findOne({token: req.headers['x-user-token']});
-
+        const user = req.user;
         const roomId = user.roomId;
 
         let { date, event, icon } = req.body;
@@ -94,8 +93,7 @@ router.post('/api/milestone/add', authMiddleware, async (req, res) => {
 router.delete('/api/milestone/remove/:itemId', authMiddleware, async (req, res) => {
 
     try {
-        const user = await userModel.findOne({token: req.headers['x-user-token']});
-
+        const user = req.user;
         const roomId = user.roomId;
 
         let { itemId } = req.params;
@@ -116,7 +114,7 @@ router.delete('/api/milestone/remove/:itemId', authMiddleware, async (req, res) 
             message:'戀愛日誌刪除成功。',
         });
 
-    } catch (e ) {
+    } catch (e) {
         console.log(e)
         return res.send({
             type:'error',
@@ -129,7 +127,7 @@ router.delete('/api/milestone/remove/:itemId', authMiddleware, async (req, res) 
 router.put('/api/milestone/edit', authMiddleware, async (req, res) => {
 
     try {
-        const user = await userModel.findOne({token: req.headers['x-user-token']});
+        const user = req.user;
 
         const roomId = user.roomId;
 

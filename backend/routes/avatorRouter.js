@@ -12,12 +12,12 @@ const {format} = require('date-fns');
 const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
 const authMiddleware = require('../middleware/auth.middleware')
-// const { checkUsageMemory } = require('../middleware/checkUsageMemory.middleware')
 const { upload, autoCleanupTmp } = require('../config/multer.config');
 const path = require('path');
 
 const { baseDir } = require('../config/pathConfig');
 
+const { tokenCache } = require('../cache/cache');
 
 // 確保 userAvatar 資料夾存在
 const avatarDir = path.join(baseDir, 'userAvatar');
@@ -60,6 +60,7 @@ router.post('/api/img/updateUserAvator',authMiddleware,upload.fields([{ name: 'a
         }
 
         await user.save();
+        tokenCache.delete(token);
 
         return res.send({
             type:'success',

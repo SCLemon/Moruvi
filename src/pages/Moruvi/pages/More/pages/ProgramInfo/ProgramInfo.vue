@@ -38,7 +38,7 @@
             </div>
             <div class="paragraph-title">
                 聯絡窗口
-                <div class="declare-date">版本序：v1.0.1.0</div>
+                <div class="declare-date">版本序：v1.0.2.0</div>
             </div>
             <div class="paragraph">
                 blc0000421@gmail.com 

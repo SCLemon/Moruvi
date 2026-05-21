@@ -304,7 +304,7 @@ router.delete('/api/prize/removePrize/:itemId', authMiddleware, async (req, res)
     const { itemId } = req.params;
 
     try {
-        const user = await userModel.findOne({token: req.headers['x-user-token']});
+        const user = req.user;
     
         if(!user){
             return res.send({
@@ -345,7 +345,7 @@ router.post('/api/prize/purchase', authMiddleware, async (req, res) => {
     const { itemId } = req.body;
 
     try {
-        const user = await userModel.findOne({token: req.headers['x-user-token']});
+        const user = req.user;
     
         if(!user){
             return res.send({
@@ -439,7 +439,7 @@ router.get('/api/prize/completePrize/:itemId', authMiddleware, async (req, res) 
     const { itemId } = req.params;
 
     try {
-        const user = await userModel.findOne({token: req.headers['x-user-token']});
+        const user = req.user;
     
         if(!user){
             return res.send({
@@ -491,7 +491,7 @@ router.get('/api/prize/cancelPrize/:itemId', authMiddleware, async (req, res) =>
     const { itemId } = req.params;
 
     try {
-        const user = await userModel.findOne({token: req.headers['x-user-token']});
+        const user = req.user;
     
         if(!user){
             return res.send({
@@ -544,7 +544,7 @@ router.get('/api/prize/cancelPrize/:itemId', authMiddleware, async (req, res) =>
 
 async function notifyPrize(req, title, subTitle, content) {
     try{
-        const user = await userModel.findOne({token: req.headers['x-user-token']});
+        const user = req.user;
     
         if(!user){
             return {
