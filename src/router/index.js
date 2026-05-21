@@ -159,6 +159,8 @@ const router = new VueRouter({
 router.beforeEach(async (to, from, next) => {
     const token = jsCookie.get('authToken')
     
+    let save = false;
+
     // 通用驗證
     const allowedPaths = ['/', '/login'];
     if (allowedPaths.includes(to.path)) {
@@ -167,7 +169,13 @@ router.beforeEach(async (to, from, next) => {
     
     if (!token) return next('/login')
     
-    const res = await axios.post('/login/token',{save:false},{
+    console.log(from.path, '->', to.path)
+
+
+    // 從首頁順利導向到主頁面，則要歷史儲存紀錄
+    if(from.path ==='/') save = true;
+
+    const res = await axios.post('/login/token',{save},{
         headers:{
             'x-user-token':token,
         }

@@ -37,7 +37,7 @@ router.get('/api/homeSetting/getData', authMiddleware, async (req, res) => {
             });
         }
 
-        const usage = await getFolderSize(room.database.url);
+        const usage = getFolderSize(room.database.url);
 
         const output = {
             roomId: room.roomId,
