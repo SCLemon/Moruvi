@@ -31,7 +31,10 @@
     <div class="folder-list-wrapper folder-list-wrapper-none" v-else>
         <el-empty description="查無回憶錄"></el-empty>
     </div>
-    <div class="folder-add-button" v-if="showAddButton" @click="openUpload()"><i class="fa-solid fa-plus"></i></div>
+    <div class="folder-add-button" v-if="showAddButton" @click="!isUploading?openUpload():''">
+        <i class="fa-solid fa-plus" v-if="!isUploading"></i>
+        <img class="spinner" src="img/spinner.gif" alt="" v-else>
+    </div>
     <input type="file" ref="uploadImages" multiple accept="image/*" style="display: none;" @change="addFile()">
   </div>
 </template>
@@ -57,12 +60,41 @@ export default {
             list: [],
             keyword:'',
             showAddButton: true,
+
+            isUploading: false,
+            fileQueue:[],
         }
     },
     async mounted(){
         await this.getData();
+        window.addEventListener('beforeunload', this.handleBeforeUnload);
+    },
+
+    beforeDestroy(){
+        window.removeEventListener('beforeunload', this.handleBeforeUnload);
+    },
+
+    beforeRouteLeave(to, from, next) {
+        if (this.isUploading) {
+            
+            const answer = window.confirm('檔案尚未上傳完成，確定離開？');
+            
+            if (answer) next();
+            else next(false);
+            
+        } 
+        else next();
     },
     methods:{
+        handleBeforeUnload(event) {
+
+            if (!this.isUploading) return;
+
+            event.preventDefault();
+            event.returnValue = '';
+            
+            return '檔案尚未上傳完成，確定離開？'; 
+        },
         handleScroll(){
             const buffer = 10;
             const el = this.$refs['folder-list-wrapper'];
@@ -100,11 +132,14 @@ export default {
         },
 
         async addFile() {
+
+            if(this.isUploading) return;
+            this.isUploading = true;
+
             try {
                 const files = this.$refs.uploadImages.files;
                 if (!files || files.length === 0) return;
 
-                const fileQueue = [];
                 const MAX_SINGLE_SIZE = 25 * 1024 * 1024;
 
                 for (const file of files) {
@@ -128,14 +163,14 @@ export default {
 
                     this.list.unshift(newUploadItem);
 
-                    fileQueue.push({ file, uniqueKey, newUploadItem });
+                    this.fileQueue.push({ file, uniqueKey, newUploadItem });
                 }
 
 
                 const uploadWorker = async () => {
 
-                    while (fileQueue.length > 0) {
-                        const task = fileQueue.shift();
+                    while (this.fileQueue.length > 0) {
+                        const task = this.fileQueue.shift();
                         if (!task) break;
 
                         const { file, uniqueKey, newUploadItem } = task;
@@ -160,7 +195,6 @@ export default {
                                 const targetIndex = this.list.findIndex(item => item.index === uniqueKey);
                                 if (targetIndex !== -1) {
                                     this.$set(this.list, targetIndex, res.data.data);
-
                                 }
                             } 
                             else {
@@ -177,7 +211,7 @@ export default {
                 const CONCURRENCY_LIMIT = 3;
                 const workers = [];
                 
-                const workerCount = Math.min(CONCURRENCY_LIMIT, fileQueue.length);
+                const workerCount = Math.min(CONCURRENCY_LIMIT, this.fileQueue.length);
                 
                 for (let i = 0; i < workerCount; i++) {
                     workers.push(uploadWorker());
@@ -185,10 +219,13 @@ export default {
 
                 await Promise.all(workers);
 
-            } catch (e) {
+            } 
+            catch (e) {
                 console.error(e);
-            } finally {
+            } 
+            finally {
                 this.$refs.uploadImages.value = '';
+                this.isUploading = false;
             }
         },
         async renameFile(file){
@@ -299,8 +336,6 @@ export default {
                 if (isHeic) {
                     this.previewStatus.status = 'HEIC 格式轉換中...';
                     
-                    // 2. 進行轉檔：這裡轉成不失真的 PNG
-                    // 如果想轉成高畫質 JPG，可以改為 toType: 'image/jpeg', quality: 0.95
                     const convertedBlob = await heic2any({
                         blob: imageBlob,
                         toType: 'image/png' 
@@ -501,5 +536,10 @@ export default {
     }
     .folder-list-item-percent-bar-error{
         background: red;
+    }
+    .spinner{
+        width: 50px;
+        height: 50px;
+        border-radius: 50px;
     }
 </style>
