@@ -1,10 +1,9 @@
-// token 驗證
 const { LRUCache } = require('lru-cache');
 
-// 1. 初始化 LRU 快取
+// token 快取，儲存已驗證過的 token，避免每次請求都要查資料庫
 const tokenCache = new LRUCache({
-    max: 5000,
-    ttl: 1000 * 60 * 15,
+    max: 1000,
+    ttl: 1000 * 60 * 5, // 5 分鐘
     updateAgeOnGet: false,
 });
 

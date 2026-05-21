@@ -181,20 +181,20 @@ router.post('/login/token', async (req, res) => {
     const token = req.headers['x-user-token'];
     const save = req.body.save;
 
-    const isTokenValid = tokenCache.get(token);
+    let cachedUser = tokenCache.get(token);
 
-    if (!save && isTokenValid) {
+    if (!save && cachedUser) {
         return res.send({ type: 'success', message: '登入成功！', showAlert: false });
     }
 
     try {
+        let user;
 
         if (save) {
             const loginTime = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
             const history = historyGenerator(req);
 
-            // 直接更新資料庫
-            const updateResult = await userModel.updateOne(
+            user = await userModel.findOneAndUpdate(
                 { token },
                 { 
                     $set: { lastOnline: loginTime },
@@ -204,21 +204,22 @@ router.post('/login/token', async (req, res) => {
                             $slice: -100 
                         } 
                     }
-                }
-            );
+                },
+                { new: true }
+            ).lean();
 
-            if (updateResult.matchedCount === 0 && !isTokenValid) {
+            if (!user) {
                 return res.send({ type: 'error', message: '無效使用者，請重新登入', showAlert: true });
             }
         } 
         else {
-            const userExists = await userModel.exists({ token });
-            if (!userExists) {
+            user = await userModel.findOne({ token }).lean();
+            if (!user) {
                 return res.send({ type: 'error', message: '無效使用者，請重新登入', showAlert: true });
             }
         }
 
-        tokenCache.set(token, true);
+        tokenCache.set(token, user);
 
         return res.send({ type: 'success', message: '登入成功！', showAlert: false });
     } 
