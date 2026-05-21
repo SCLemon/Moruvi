@@ -1,8 +1,14 @@
 <template>
   <div class="list-wrapper">
-    <div class="list-add-mission" @click="goTo('/moruvi/mission-modifier?from=mission-list')">張貼任務</div>
+    <div class="list-add-button-wrapper">
+        <el-radio-group v-model="isMineList">
+            <el-radio-button label="false">任務</el-radio-button>
+            <el-radio-button label="true">我的</el-radio-button>
+        </el-radio-group>
+        <div class="list-add-mission" @click="goTo('/moruvi/mission-modifier?from=mission-list')">張貼任務</div>
+    </div>
     <template v-if="list.length">
-        <div :class="{list: true, myList: item.isMine}" v-for="(item, id) in list" :key="id" @click="goTo(`/moruvi/mission-modifier/${item.itemId}?from=mission-list`)">
+        <div :class="{list: true}" v-for="(item, id) in list" :key="id" @click="goTo(`/moruvi/mission-modifier/${item.itemId}?from=mission-list`)">
             <div class="list-content-wrapper">
                 <div class="list-content">{{item.title}}</div>
                 <div class="list-money">{{item.money}} 金幣</div>
@@ -33,7 +39,16 @@ export default {
     name: 'MissionList',
     data(){
         return {
+            isMineList: this.$route.query.isMineList == 'true' || false,
             list:[]
+        }
+    },
+    watch:{
+        isMineList:{
+            deep: true,
+            async handler(){
+                await this.getData();
+            }
         }
     },
     async mounted(){
@@ -45,9 +60,9 @@ export default {
         },
         async getData(){
             try{
-                const res = await axios.get('/api/mission/waitToGet',{
+                const res = await axios.get(`/api/mission/waitToGet?isMineList=${this.isMineList}`,{
                     headers:{
-                    'x-user-token': jsCookie.get('authToken')
+                        'x-user-token': jsCookie.get('authToken')
                     }
                 });
                 if(res.data.type == 'error'){
@@ -134,13 +149,19 @@ export default {
         padding-right: 3px;
         box-sizing: border-box;
     }
+    .list-add-button-wrapper{
+        display: flex;
+        height: 60px;
+        width: 100%;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 15px;
+    }
     .list-add-mission{
         padding: 5px 10px 5px 10px;
         width: 90px;
         height: 40px;
         border-radius: 5px;
-        margin-left: auto;
-        margin-bottom: 20px;
         font-size: 14px;
         color: white;
         display: flex;
@@ -148,7 +169,6 @@ export default {
         align-items: center;
         box-sizing: border-box;
         background: pink;
-
     }
     .list{
         width: 100%;
@@ -162,9 +182,6 @@ export default {
         align-items: center;
         padding-left: 15px;
         padding-right: 15px;
-    }
-    .myList{
-        box-shadow: 0px 0px 8px rgb(255, 224, 229);
     }
     .list-content-wrapper{
         width: calc(100% - 120px);
@@ -216,5 +233,10 @@ export default {
     }
     .list-status{
         color: rgba(210,210,210);
+    }
+    :deep(.el-radio-button__orig-radio:checked+.el-radio-button__inner){
+        background-color: pink;
+        border-color: pink;
+        box-shadow: -1px 0 0 0 pink;
     }
 </style>

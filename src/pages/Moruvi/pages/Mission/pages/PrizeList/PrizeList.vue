@@ -1,6 +1,12 @@
 <template>
   <div class="list-wrapper">
-    <div class="list-add-mission" @click="goTo('/moruvi/prize-modifier?from=prize-list')">新增商品</div>
+    <div class="list-add-button-wrapper">
+        <el-radio-group v-model="isMineList">
+            <el-radio-button label="false">商品</el-radio-button>
+            <el-radio-button label="true">我的</el-radio-button>
+        </el-radio-group>
+        <div class="list-add-mission" @click="goTo('/moruvi/prize-modifier?from=prize-list')">新增商品</div>
+    </div>
     <template v-if="list.length">
         <div class="list" v-for="(item, id) in list" :key="id" @click="goTo(`/moruvi/prize-modifier/${item.itemId}?from=prize-list`)">
             <div class="list-content-wrapper">
@@ -26,7 +32,16 @@ export default {
     name: 'PrizeList',
     data(){
         return {
+            isMineList: this.$route.query.isMineList == 'true' || false,
             list:[]
+        }
+    },
+    watch:{
+        isMineList:{
+            deep: true,
+            async handler(){
+                await this.getData();
+            }
         }
     },
     async mounted(){
@@ -38,9 +53,9 @@ export default {
         },
         async getData(){
             try{
-                const res = await axios.get('/api/prize/getPrizeList',{
+                const res = await axios.get(`/api/prize/getPrizeList?isMineList=${this.isMineList}`,{
                     headers:{
-                    'x-user-token': jsCookie.get('authToken')
+                        'x-user-token': jsCookie.get('authToken')
                     }
                 });
                 if(res.data.type == 'error'){
@@ -105,13 +120,19 @@ export default {
         padding-right: 3px;
         box-sizing: border-box;
     }
+    .list-add-button-wrapper{
+        display: flex;
+        height: 60px;
+        width: 100%;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 15px;
+    }
     .list-add-mission{
         padding: 5px 10px 5px 10px;
         width: 90px;
         height: 40px;
         border-radius: 5px;
-        margin-left: auto;
-        margin-bottom: 20px;
         font-size: 14px;
         color: white;
         display: flex;
@@ -119,7 +140,6 @@ export default {
         align-items: center;
         box-sizing: border-box;
         background: pink;
-
     }
     .list{
         width: 100%;
@@ -183,5 +203,10 @@ export default {
     }
     .list-status{
         color: rgba(210,210,210);
+    }
+    :deep(.el-radio-button__orig-radio:checked+.el-radio-button__inner){
+        background-color: pink;
+        border-color: pink;
+        box-shadow: -1px 0 0 0 pink;
     }
 </style>

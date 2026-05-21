@@ -31,13 +31,13 @@ export default {
             form:{
                 title:'',
                 description:'',
-                money:0,
+                money: null,
             }
         }
     },
     computed:{
       sendEnabled(){
-        return !(Object.values([this.form.title, this.form.description]).some(value => value == null || String(value).trim() === '')) && (this.$refs['form-content']?.innerText.trim()!='');
+        return !(Object.values(this.form).some(value => value == null || String(value).trim() === '')) && (this.$refs['form-content']?.innerText.trim()!='');
       },
     },
     async mounted(){
@@ -85,7 +85,7 @@ export default {
                     }
                 });
                 if(res.data.type == 'success'){
-                   this.goTo('/moruvi/mission');
+                   this.goTo('/moruvi/mission?isMineList=true');
                 }
                 this.$bus.$emit('handleAlert','系統訊息', res.data.message,res.data.type);
             }catch(e){}   

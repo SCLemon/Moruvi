@@ -12,9 +12,9 @@
     </div>
     <div class="options-wrapper">
       <div :class="{option: true, 'option-selected': $route.path.includes('/moruvi/mission/mission-list') }" @click="goTo('/moruvi/mission/mission-list')">任務接取</div>
-      <div :class="{option: true, 'option-selected': $route.path.includes('/moruvi/mission/get-mission-list')}" @click="goTo('/moruvi/mission/get-mission-list')">我的任務</div>
+      <div :class="{option: true, 'option-selected': $route.path.includes('/moruvi/mission/get-mission-list')}" @click="goTo('/moruvi/mission/get-mission-list')">接取清單</div>
       <div :class="{option: true, 'option-selected': $route.path.includes('/moruvi/mission/prize-list')}" @click="goTo('/moruvi/mission/prize-list')">兌換獎勵</div>
-      <div :class="{option: true, 'option-selected': $route.path.includes('/moruvi/mission/get-purchase-list')}" @click="goTo('/moruvi/mission/get-purchase-list')">我的背包</div>
+      <div :class="{option: true, 'option-selected': $route.path.includes('/moruvi/mission/get-purchase-list')}" @click="goTo('/moruvi/mission/get-purchase-list')">我的庫存</div>
     </div>
     <router-view class="router-view"></router-view>
   </div>
