@@ -89,7 +89,9 @@ export default {
             },
           });
           if(res.data.type == 'success'){
-            await this.getData();
+            this.roomId = res.data.data.roomId;
+            this.roomName = res.data.data.roomName;
+            this.locked = res.data.data.locked;
           }
           this.$bus.$emit('handleAlert','系統訊息', res.data.message,res.data.type);
         }
