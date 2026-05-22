@@ -120,7 +120,9 @@ export default {
                         this.userAvatorStatus.status = percent + '%';
                     },
                 })
-                if(res.data.type == 'success') await this.getData();
+                if(res.data.type == 'success'){
+                    this.overviewData.user.userImgUrl = res.data.userImgUrl;
+                }
                 else this.$bus.$emit('handleAlert','頭像上傳通知',res.data.message,res.data.type)
                 this.userAvatorStatus.processing = false;
                 this.userAvatorStatus.status = '';

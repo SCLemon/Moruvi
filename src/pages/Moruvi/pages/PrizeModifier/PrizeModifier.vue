@@ -70,7 +70,7 @@ export default {
         },
         goBack(){
             const from = this.$route.query.from;
-            this.goTo('/moruvi/mission/'+from);
+            this.goTo('/moruvi/mission/'+from +'?isMineList=true');
         },
         handleInput(event){
             const target = event.target;

@@ -68,7 +68,7 @@ export default {
             },
           });
           if(res.data.type == 'success'){
-            await this.getData();
+            this.form = res.data.data
           }
           this.$bus.$emit('handleAlert','系統訊息', res.data.message,res.data.type);
         }

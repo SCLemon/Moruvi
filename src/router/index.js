@@ -168,9 +168,6 @@ router.beforeEach(async (to, from, next) => {
     }
     
     if (!token) return next('/login')
-    
-    console.log(from.path, '->', to.path)
-
 
     // 從首頁順利導向到主頁面，則要歷史儲存紀錄
     if(from.path ==='/') save = true;

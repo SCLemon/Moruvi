@@ -58,6 +58,7 @@ export default {
         showPartnerOptions: false,
         roomInfo:{
           roomId:'',
+          locked: true,
           owners:[]
         },
         list:[],
@@ -147,10 +148,10 @@ export default {
               'x-user-token': jsCookie.get('authToken')
             }
           });
-          if(res.data.type == 'error'){
-            this.$bus.$emit('handleAlert','系統訊息', res.data.message,res.data.type);
+          if(res.data.type == 'success'){
+            this.roomInfo.locked = res.data.data.locked;
           }
-          await this.getRoomInfo();
+          else this.$bus.$emit('handleAlert','系統訊息', res.data.message,res.data.type);
         }
         catch(e){
           console.log(e)
