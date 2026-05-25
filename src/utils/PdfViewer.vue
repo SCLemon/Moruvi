@@ -31,12 +31,21 @@ export default {
     preloadCount:{
       type: Number,
       default: 1
+    },
+    contextLayer:{
+      type: Boolean,
+      default: true,
+    },
+    fakeLoadingProgress:{ // 避免 chrome 的渲染機制問題
+      type: Boolean,
+      default: false,
     }
   },
   data() {
     return {
       isLoading: true,
       loadProgress:0,
+      loadTimer: null,
       pdf: null,
       pageCache: new Map(),
       pageCanvases: [],
@@ -140,13 +149,24 @@ export default {
           url: this.pdfUrl,
           httpHeaders: this.httpHeaders,
           verbosity: pdfjsLib.VerbosityLevel.ERRORS,
-        });
 
-        // 下載進度條
+        },);
+
+        // 下載進度條(偽進度條)
+        if(this.fakeLoadingProgress){
+          this.loadTimer = setInterval(() => {
+            if(this.loadProgress < 90){
+              const step = Math.random() * 5;
+              this.loadProgress += Math.min(Math.floor(step),90);
+            }
+          }, 75);
+        }
+
         loadingTask.onProgress = (progressData) => {
           const { loaded, total } = progressData;
           const percent = Math.min(Math.round((loaded / total) * 100), 100);
           this.loadProgress = percent;
+          clearInterval(this.loadTimer)
         };
 
         this.pdf = await loadingTask.promise;
@@ -279,73 +299,119 @@ export default {
 
       pageObj.canvasWrapper.dataset.rendered = false;
     },
-    // 進行頁面渲染
-    async safeRenderPage(pageNum, canvasWrapper) {
-      
-      const pageObj = this.pageCanvases.find(p => p.pageNum === pageNum);
-      if (!pageObj || !this.pdf || canvasWrapper.dataset.rendered === 'true') return
 
-      // cache 緩存頁面
+
+    // 進行頁面渲染 v2 (with text Layer)
+    async safeRenderPage(pageNum, canvasWrapper) {
+
+      const dpr = window.devicePixelRatio || 1;
+      const qualityFactor = 1.75;
+
+      const pageObj = this.pageCanvases.find(p => p.pageNum === pageNum);
+      if (!pageObj || !this.pdf || canvasWrapper.dataset.rendered === 'true') return;
+
       let page = this.pageCache.get(pageNum);
+
       if (!page) {
         page = await this.pdf.getPage(pageNum);
         this.pageCache.set(pageNum, page);
-        
-        // 清除舊頁面資料
+
         if (this.pageCache.size > 20) {
-            const oldest = this.pageCache.keys().next().value;
-            const oldPage = this.pageCache.get(oldest);
-            if (!pageObj.renderTask && oldPage?.cleanup) {
-              await oldPage.cleanup();
-            } 
-            this.pageCache.delete(oldest);
+          const oldest = this.pageCache.keys().next().value;
+          const oldPage = this.pageCache.get(oldest);
+
+          if (!pageObj.renderTask && oldPage?.cleanup) {
+            await oldPage.cleanup();
+          }
+
+          this.pageCache.delete(oldest);
         }
       }
-      
-      // 建立 canvas 並插入到 canvasWrapper
+
+      canvasWrapper.style.position = 'relative';
+
       const canvas = document.createElement('canvas');
       canvas.style.display = 'block';
       canvas.style.marginTop = '5px';
       canvas.style.marginBottom = '5px';
       canvas.dataset.pageNum = pageNum;
-    
-      // 開始繪圖
-      const containerWidth = this.$refs.pdfContainer.clientWidth;
-      const dpr = window.devicePixelRatio || 1;
-      const qualityFactor = 1.75;
-      const viewport = page.getViewport({ scale: 1 });
-      const scale = (containerWidth / viewport.width) * dpr * qualityFactor;
-      const scaledViewport = page.getViewport({ scale });
 
-      canvas.width = scaledViewport.width;
-      canvas.height = scaledViewport.height;
-      canvas.style.width = `${containerWidth}px`;
-      canvas.style.height = `${(scaledViewport.height / scaledViewport.width) * containerWidth}px`;
-      canvas.style.border = '0.5px solid rgba(0,0,0,0.15)';
+      const containerWidth = this.$refs.pdfContainer.clientWidth;
+      const viewport = page.getViewport({ scale: 1 });
+
+      const renderViewport = page.getViewport({
+        scale: (containerWidth / viewport.width) * qualityFactor
+      });
+
+      const textViewport = page.getViewport({
+        scale: containerWidth / viewport.width
+      });
+
+      canvas.width = renderViewport.width * dpr;
+      canvas.height = renderViewport.height * dpr;
+
+      canvas.style.width = `${textViewport.width}px`;
+      canvas.style.height = `${textViewport.height}px`;
+
+      canvas.style.border = '0.5px solid rgba(0,0,0,.15)';
       canvas.style.boxSizing = 'border-box';
 
-      const ctx = canvas.getContext('2d');
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
+      let textLayer = null;
 
-      // 建立 renderTask 並保存
-      pageObj.renderTask = page.render({ canvasContext: ctx, viewport: scaledViewport });
+      if (this.contextLayer) {
+        textLayer = document.createElement('div');
+        textLayer.className = 'textLayer';
+        textLayer.style.width = `${textViewport.width}px`;
+        textLayer.style.height = `${textViewport.height}px`;
+        textLayer.style.position = 'absolute';
+        textLayer.style.top = '0';
+        textLayer.style.left = '0';
+      }
+
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+      ctx.imageSmoothingEnabled = false;
+
+      pageObj.renderTask = page.render({
+        canvasContext: ctx,
+        viewport: renderViewport
+      });
 
       try {
+
         await pageObj.renderTask.promise;
-        
+
+        if (this.contextLayer && textLayer) {
+          const textContent = await page.getTextContent();
+
+          await pdfjsLib.renderTextLayer({
+            textContent,
+            container: textLayer,
+            viewport: textViewport
+          });
+        }
+
         canvasWrapper.innerHTML = '';
+
         canvasWrapper.appendChild(canvas);
+
+        if (this.contextLayer && textLayer) {
+          canvasWrapper.appendChild(textLayer);
+        }
+
         canvasWrapper.dataset.rendered = true;
         pageObj.canvasWrapper = canvasWrapper;
-      } 
-      catch (e) {
-        console.log(e)
-      } 
-      finally {
-        pageObj.renderTask = null; // render 完成後清除
+
       }
+      catch (e) {
+        console.log(e);
+      }
+      finally {
+        pageObj.renderTask = null;
+      }
+
     },
+
     async handleResize() {
 
       if (this.resizeTimer) clearTimeout(this.resizeTimer);
@@ -375,6 +441,8 @@ export default {
 </script>
 
 <style scoped>
+@import 'pdfjs-dist/legacy/web/pdf_viewer.css';
+
   .pdf-wrapper{
     width: 100%;
     position: relative;
